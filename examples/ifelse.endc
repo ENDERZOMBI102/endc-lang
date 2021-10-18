@@ -1,0 +1,15 @@
+|* if else example 14/10/2021
+*|
+DCLAR FUNC main{StRiNg() argv______} <- InTgR [
+     |* this is "true"
+     *|
+     DCLAR CONSTANT BoOlAn thisWillBChckd = !NO/
+     CHCK IF { thisWillBChckd IS !NO } DO [
+          DCLAR CONSTANT StRiNg printtotxt = *it was true*/
+          CALL printto{ STDOUT. printtotxt }/
+     ] LS [
+          DCLAR CONSTANT StRiNg printtotxt = *it was false*/
+          CALL printto{ STDOUT. printtotxt }/
+     ]
+     GIV BACK 0/
+]

@@ -1,0 +1,16 @@
+Objectives:
+  - Have multiple platforms:
+    - [ ] Direct Interpretation
+    - [ ] LLVM IR
+    - [ ] Python Bytecode
+    - [ ] JVM Bytecode
+    - [ ] Neko bytecode
+    - [ ] JavaScript
+    - [ ] WASM text format
+  - [ ] Have classes
+  - [ ] Functional types
+  - [ ] Static typing
+  - [ ] AST rappresentation
+  - [ ] Access to interpreter internals (py-like)
+  - [ ] Self-hosting
+  - [ ] Simple stack-based VM

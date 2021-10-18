@@ -1,0 +1,7 @@
+|* hello world example 14/10/2021
+*|
+DCLAR FUNC main{StRiNg() argv______} <- InTgR [
+     DCLAR CONSTANT StRiNg txt_______ = *hello world!*/
+     CALL printto{ STDOUT. txt_______ }/
+     GIV BACK 0/
+]

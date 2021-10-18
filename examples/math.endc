@@ -1,0 +1,17 @@
+|* math examples 18/10/2021
+*|
+DCLAR FUNC main{StRiNg() argv______} [
+     DCLAR CONSTANT StRiNg ADDPRINTTXT = *9 - 3 = */
+     DCLAR CONSTANT StRiNg SUBTRACTPRINTTXT = *\n9 + 3 = */
+     DCLAR CONSTANT StRiNg DIVIDPRINTTXT = *\n9 ; 3 = */
+     DCLAR CONSTANT StRiNg MODULOPRINTTXT = *\n9 \ 3 = */
+     CALL printto{ STDOUT. ADDPRINTTXT }/
+     CALL printto{ STDOUT. 9 - 3 }/
+     CALL printto{ STDOUT. SUBTRACTPRINTTXT }/
+     CALL printto{ STDOUT. 9 + 3 }/
+     CALL printto{ STDOUT. DIVIDPRINTTXT }/
+     CALL printto{ STDOUT. 9 ; 3 }/
+     CALL printto{ STDOUT. MODULOPRINTTXT }/
+     CALL printto{ STDOUT. 9 \ 3 }/
+     GIV BACK 0/
+]

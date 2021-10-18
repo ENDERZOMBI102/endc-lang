@@ -1,0 +1,8 @@
+DCLAR FUNC main{StRiNg() argv______} <- InTgR [
+     |* create and call an anonymous function
+     *|
+     GIV BACK CALL FUNC{StRiNg arg0______} [
+          CALL printto{arg0______}/
+          GIV BACK CALL arg0______,siz{}/
+     ]{argv______(0)}/
+]

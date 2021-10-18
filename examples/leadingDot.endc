@@ -1,0 +1,4 @@
+DCLAR FUNC main{StRiNg() argv______} [
+     DCLAR CONSTANT InTgR ladingDot = ,9/
+     CALL printto{ STDOUT. ladingDot }/
+]

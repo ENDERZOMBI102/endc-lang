@@ -1,0 +1,6 @@
+https://gitlab.com/tsoding/porth/-/blob/master/porth.py
+
+
+N/A -> basic code analysis -> type check + adv code analysis -> run
+read file -> tokenize -> generate AST -> backend selection -> interpret -> exit
+                                                          \-> gen backend-specific IR -> compile -> run -> exit
