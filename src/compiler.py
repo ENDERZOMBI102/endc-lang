@@ -105,6 +105,7 @@ def main() -> int:
 		if args.verboseLevel <= verb:
 			print(msg, file=file)
 
+	exitCode: int = 0
 	# execute build
 	try:
 		if not args.file.exists():
@@ -128,7 +129,7 @@ def main() -> int:
 			return 1
 
 		log(0, f'[INFO] Executing backend "{backend.name}"..')
-		cast( Backend, import_module( backend.pkg ) ).backendMain(ast)
+		exitCode = cast( Backend, import_module( backend.pkg ) ).backendMain(ast)
 
 		if args.postCompileScript:
 			if not args.postCompileScript.exists():
@@ -139,10 +140,11 @@ def main() -> int:
 
 	except SystemExit as e:
 		return e.code
+	return exitCode
 
 
 if __name__ == '__main__':
 	start = time()
-	exitCode = main()
+	_exitCode = main()
 	print( f'Done in {time() - start}' )
-	exit( exitCode )
+	exit( _exitCode )

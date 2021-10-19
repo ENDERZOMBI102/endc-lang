@@ -72,10 +72,10 @@ class Interpreter(Visitor[object]):
 		return left == right
 
 
-def backendMain(ast) -> bool:
+def backendMain(ast) -> int:
 	try:
 		print( Interpreter().evaluate(ast) )
 	except Exception as e:
 		print(e)
-		return False
-	return True
+		return 1
+	return 0
