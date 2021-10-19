@@ -1,3 +1,12 @@
 DCLAR FUNC main{StRiNg() argv______} [
-     CHCK IF
+     |* aka 23 >= 22 -> false
+     *|
+     CHCK IF { 23 =< 22 } [
+          DCLAR CONSTANT falsytxt__ = *a greater/equal to b*/
+          CALL printto{ STDOUT. falsytxt__ }/
+     ] LS [
+          DCLAR CONSTANT truthytxt__ = *a smoller than b*/
+          CALL printto{ STDOUT. truthytxt__ }/
+     ]
+     GIV BACK 0/
 ]

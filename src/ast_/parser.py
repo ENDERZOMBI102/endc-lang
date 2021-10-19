@@ -53,7 +53,7 @@ class Parser:
 	def comparison( self ) -> Expr:
 		expr: Expr = self.term()
 
-		while self.match(Keyword.GREATER, Keyword.GREATER_EQUAL):
+		while self.match(UnaryType.GREATER, UnaryType.GREATER_EQUAL):
 			operator: Token = self.previous()
 			right: Expr = self.term()
 			expr = Binary(expr, operator, right)

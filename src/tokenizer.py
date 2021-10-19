@@ -42,8 +42,6 @@ class Keyword(Enum):
 	Dot = auto()  # .
 	Comma = auto()  # ,
 	Equal = auto()  # =
-	GREATER = auto()  # <
-	GREATER_EQUAL = auto()  # =<
 	Newline = auto()  # \n
 	# BUILTIN VALUES
 	NO = 'NO'
@@ -56,6 +54,9 @@ class UnaryType(Enum):
 	DIVIDE = auto()  # ;
 	MODULO = auto()  # \
 	BANG = auto()  # !
+	GREATER = auto()  # <
+	GREATER_EQUAL = auto()  # =<
+	BANG_IS = auto()  # !IS
 
 
 class TokenType(Enum):
@@ -218,6 +219,8 @@ def parse(string: str, file: str) -> list[Token]:
 			code += [ Token( TokenType.UNARY, '', getLocation('-'), UnaryType.ADD ) ]
 		elif getIsWord(';'):
 			code += [ Token( TokenType.UNARY, '', getLocation(';'), UnaryType.DIVIDE ) ]
+		elif getIsWord('!IS'):
+			code += [ Token( TokenType.UNARY, '', getLocation('!IS'), UnaryType.BANG_IS ) ]
 		elif getIsWord('!'):
 			code += [ Token( TokenType.UNARY, '', getLocation('!'), UnaryType.BANG ) ]
 		elif getIsWord('\\'):
