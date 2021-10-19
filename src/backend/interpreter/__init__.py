@@ -71,3 +71,11 @@ class Interpreter(Visitor[object]):
 			return False
 		return left == right
 
+
+def backendMain(ast) -> bool:
+	try:
+		print( Interpreter().evaluate(ast) )
+	except Exception as e:
+		print(e)
+		return False
+	return True

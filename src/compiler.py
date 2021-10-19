@@ -1,8 +1,14 @@
+import os
+from json import loads
 from pathlib import Path
-from sys import argv, stderr
+from sys import argv, stderr, executable, stdout
 from argparse import ArgumentParser
+from typing import Literal, cast, TextIO
+from time import time
+from importlib import import_module
 
-import ast_
+from backend import Backend, BACKENDS
+import ast_.parser
 import tokenizer
 
 parser = ArgumentParser(
@@ -10,38 +16,133 @@ parser = ArgumentParser(
 	description='End C compiler'
 )
 parser.add_argument(
-	'file',
-	help='input file',
+	'-f',
+	'--file',
+	help='Input file',
 	action='store',
-	type=Path
+	type=Path,
+	dest='file'
+)
+parser.add_argument(
+	'-b',
+	'--backend',
+	help='Must be one of "inter", "llvm", "wasm", "py", "jvm", "neko" or "js"',
+	action='store',
+	type=str,
+	dest='backend'
+)
+parser.add_argument(
+	'-c',
+	'--config',
+	help='Sets the config file to the provided path',
+	action='store',
+	type=Path,
+	default='.endcc.json',
+	dest='configFile'
+)
+parser.add_argument(
+	'-a',
+	'--aftercomp',
+	help='Sets the python script exececuted after compile to the provided file',
+	action='store',
+	type=Path,
+	dest='postCompileScript'
+)
+parser.add_argument(
+	'-v',
+	'--verbosity',
+	help='Sets the verbosity of the log (0: everything 1: warns+errors 2: errors)',
+	action='store',
+	type=int,
+	dest='verboseLevel'
+)
+parser.add_argument(
+	'--backend-info',
+	help='Used to get information about available backends',
+	action='store_true',
+	default=False,
+	dest='showBackendHelp'
 )
 
 
 class Arguments:
 	file: Path
+	backend: Literal['inter', 'llvm', 'wasm', 'py', 'jvm', 'neko', 'js']
+	showBackendHelp: bool
+	configFile: Path
+	postCompileScript: Path
+	# 0: everything 1: warns up 2: only errors
+	verboseLevel: int
 
 
-def main():
-	from typing import cast
-	from time import time
-	start = time()
-	exitCode = 0
+def main() -> int:
+	# cli arguments
 	args: Arguments = cast( Arguments, parser.parse_args( argv[ 1: ] ) )
+	# backend help (--backed-info)
+	if args.showBackendHelp:
+		txt = 'note: backends with * are not yet available\n'
+		txt += 'Supported backends:\n'
+		for backendKey, backend in BACKENDS.items():
+			txt += f' - {backend.name} ({backendKey}){"" if backend.available else "*"}\n'
+			txt += f'\t{backend.help}\n'
+		print(txt)
+		exit(0)
+
+	# config file defaults
+	cfgFile = Path(args.configFile)
+	if cfgFile.exists():
+		print( f'[INFO] Using config at {cfgFile}' )
+		cfg: dict = loads( cfgFile.read_text() )
+		args.file = args.file or Path( cfg['defaultFile'] )
+		args.backend = args.backend or cfg.get('defaultBackend', 'inter')
+		args.verboseLevel = cfg.get( 'verboseLevel', args.verboseLevel )
+		args.postCompileScript = (
+			args.postCompileScript or
+			Path( cfg.get('postCompileScript') ) if cfg.get('postCompileScript') else None
+		)
+
+	def log(verb: int, msg: str, file: TextIO = stdout) -> None:
+		if args.verboseLevel <= verb:
+			print(msg, file=file)
+
+	# execute build
 	try:
 		if not args.file.exists():
-			print(f'[ERROR] File {args.file} not found.', file=stderr)
-			exit(1)
-		print(f'[INFO] Compiling {args.file}')
-		print(f'[INFO] Tokenizing..')
-		tokens = tokenizer.parse( args.file.read_text(), str( args.file ) )
-		print(f'[INFO] Generating AST..')
-		ast = astgen.genAst( tokens, str( args.file ) )
-	except SystemExit as e:
-		exitCode = e.code
-	print( f'Done in {time() - start}' )
-	exit(exitCode)
+			log(2, f'[ERROR] File {args.file} not found.', stderr)
+			return 1
+		log(0, f'[INFO] Compiling {args.file}')
 
+		log(0, f'[INFO] Tokenizing..')
+		tokens = tokenizer.parse( args.file.read_text(), str( args.file ) )
+
+		log(0, f'[INFO] Generating AST..')
+		ast = ast_.parser.Parser( tokens ).parse()
+
+		log(0, f'[INFO] Selecting backend..')
+		if args.backend not in BACKENDS:
+			log( 2, f'[ERROR] Trying to use invalid backend ({args.backend}), aborting.', stderr )
+			return 1
+		backend = BACKENDS[args.backend]
+		if not backend.available:
+			log(2, f'[ERROR] Selected backend ({backend.name}) is not available, aborting.', stderr)
+			return 1
+
+		log(0, f'[INFO] Executing backend "{backend.name}"..')
+		cast( Backend, import_module( backend.pkg ) ).backendMain(ast)
+
+		if args.postCompileScript:
+			if not args.postCompileScript.exists():
+				log(1, f'[WARN] Post compile script "{args.postCompileScript}" does not exist.')
+			else:
+				log(0, f'[INFO] Executing post compile script "{args.postCompileScript}"..')
+				os.system( f'{executable} {args.postCompileScript} {args.file.absolute()} {args.backend}' )
+
+	except SystemExit as e:
+		return e.code
 
 
 if __name__ == '__main__':
-	main()
+	start = time()
+	exitCode = main()
+	print( f'Done in {time() - start}' )
+	exit( exitCode )

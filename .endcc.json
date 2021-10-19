@@ -1,0 +1,6 @@
+{
+	"defaultFile": "examples/expression.endc",
+	"postCompileScript": null,
+	"defaultBackend": "inter",
+	"verboseLevel": 0
+}
