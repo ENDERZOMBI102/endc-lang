@@ -1,7 +1,7 @@
 import os
+import sys
 from json import loads
 from pathlib import Path
-from sys import argv, stderr, executable, stdout
 from argparse import ArgumentParser
 from typing import Literal, cast, TextIO
 from time import time
@@ -12,8 +12,8 @@ import ast_.parser
 import tokenizer
 
 parser = ArgumentParser(
-	prog='compiler.py',
-	description='End C compiler'
+	prog='compiler.py' if getattr(sys, 'frozen', False) else 'endcc',
+	description='End C Compiler'
 )
 parser.add_argument(
 	'-f',
@@ -77,7 +77,7 @@ class Arguments:
 
 def main() -> int:
 	# cli arguments
-	args: Arguments = cast( Arguments, parser.parse_args( argv[ 1: ] ) )
+	args: Arguments = cast( Arguments, parser.parse_args( sys.argv[ 1: ] ) )
 	# backend help (--backed-info)
 	if args.showBackendHelp:
 		txt = 'note: backends with * are not yet available\n'
@@ -101,7 +101,7 @@ def main() -> int:
 			Path( cfg.get('postCompileScript') ) if cfg.get('postCompileScript') else None
 		)
 
-	def log(verb: int, msg: str, file: TextIO = stdout) -> None:
+	def log(verb: int, msg: str, file: TextIO = sys.stdout) -> None:
 		if args.verboseLevel <= verb:
 			print(msg, file=file)
 
@@ -109,7 +109,7 @@ def main() -> int:
 	# execute build
 	try:
 		if not args.file.exists():
-			log(2, f'[ERROR] File {args.file} not found.', stderr)
+			log(2, f'[ERROR] File {args.file} not found.', sys.stderr)
 			return 1
 		log(0, f'[INFO] Compiling {args.file}')
 
@@ -121,11 +121,11 @@ def main() -> int:
 
 		log(0, f'[INFO] Selecting backend..')
 		if args.backend not in BACKENDS:
-			log( 2, f'[ERROR] Trying to use invalid backend ({args.backend}), aborting.', stderr )
+			log( 2, f'[ERROR] Trying to use invalid backend ({args.backend}), aborting.', sys.stderr )
 			return 1
 		backend = BACKENDS[args.backend]
 		if not backend.available:
-			log(2, f'[ERROR] Selected backend ({backend.name}) is not available, aborting.', stderr)
+			log(2, f'[ERROR] Selected backend ({backend.name}) is not available, aborting.', sys.stderr)
 			return 1
 
 		log(0, f'[INFO] Executing backend "{backend.name}"..')
@@ -136,7 +136,7 @@ def main() -> int:
 				log(1, f'[WARN] Post compile script "{args.postCompileScript}" does not exist.')
 			else:
 				log(0, f'[INFO] Executing post compile script "{args.postCompileScript}"..')
-				os.system( f'{executable} {args.postCompileScript} {args.file.absolute()} {args.backend}' )
+				os.system( f'{sys.executable} {args.postCompileScript} {args.file.absolute()} {args.backend}' )
 
 	except SystemExit as e:
 		return e.code
