@@ -4,6 +4,7 @@ from ast_.expr import Visitor, Binary, Grouping, Literal, Unary, Expr
 from tokenizer import UnaryType
 
 
+# noinspection PyMethodMayBeStatic
 class Interpreter(Visitor[object]):
 
 	def visitBinaryExpr( self, binary: Binary ) -> object:
@@ -42,7 +43,7 @@ class Interpreter(Visitor[object]):
 		return literal.value
 
 	def visitUnaryExpr( self, unary: Unary ) -> object:
-		right: object = self.evaluate( unary.right )
+		right: Any = self.evaluate( unary.right )
 
 		if unary.operator.value == UnaryType.SUBTRACT:
 			return -float(right)
