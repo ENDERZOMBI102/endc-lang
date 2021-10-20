@@ -63,6 +63,13 @@ parser.add_argument(
 	default=False,
 	dest='showBackendHelp'
 )
+parser.add_argument(
+	'--interactive',
+	help='Used to run the interpreter in interactive mode',
+	action='store_true',
+	default=False,
+	dest='interactiveMode'
+)
 
 
 class Arguments:
@@ -71,6 +78,7 @@ class Arguments:
 	showBackendHelp: bool
 	configFile: Path
 	postCompileScript: Path
+	interactiveMode: bool
 	# 0: everything 1: warns up 2: only errors
 	verboseLevel: int
 
@@ -108,6 +116,10 @@ def main() -> int:
 	exitCode: int = 0
 	# execute build
 	try:
+		# interactive mode
+		if args.interactiveMode:
+			return import_module( 'backend.interpreter.interactive' ).interactiveMain()
+
 		if not args.file.exists():
 			log(2, f'[ERROR] File {args.file} not found.', sys.stderr)
 			return 1
