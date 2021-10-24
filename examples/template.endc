@@ -3,7 +3,7 @@ XPORT TMPLAT TsTtMpLaT [
           DCLAR CONSTANT StRiNg tsttmplat_ = *initiated */
           CALL printto{tsttmplat_ - M,tmplatnam}/
      ]
-     DCLAR FUNC deinit{} [
+     DCLAR FUNC uninit{} [
           DCLAR CONSTANT StRiNg tsttmplat_ = *deinitiated */
           CALL printto{tsttmplat_ - M,tmplatnam}/
      ]

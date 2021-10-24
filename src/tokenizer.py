@@ -4,6 +4,7 @@ from enum import auto, Enum
 from typing import Union
 
 Loc = tuple[ str, int, int ]
+printToStderrOnFatalError: bool = False
 
 
 class Keyword(Enum):
@@ -106,7 +107,7 @@ def parse(codeString: str, file: str) -> list[Token]:
 		return file, lineN, char - ( len(word) - 1 )
 
 	def assertIsKw(kw: Keyword, curr: Keyword, loc: Loc, offset: int = 0) -> None:
-		if code[ -1 + offset ].typ != TokenType.KEYWORD or code[ -1 + offset ].value != kw:
+		if len(code) == 0 or code[ -1 + offset ].typ != TokenType.KEYWORD or code[ -1 + offset ].value != kw:
 			fatal(
 				f'Missing {kw.name} keyword before {curr.name} keyword at line ' '{line} column {char}',
 				loc[1],
@@ -114,10 +115,12 @@ def parse(codeString: str, file: str) -> list[Token]:
 			)
 
 	def fatal(message: str, lineNum: int, col: int) -> None:
-		print( f'ERROR: File "{file}", line {lineNum+1} - {message.format(line=lineNum + 1, char=col)}', file=stderr )
-		print( lines[lineNum], file=stderr )
-		print( ( ' ' * ( col - 1 ) ) + '^ here', file=stderr, flush=True )
-		raise TokenizerError()
+		err = f'ERROR: File "{file}", line { lineNum + 1 } - {message.format(line=lineNum + 1, char=col)}\n'
+		err += lines[lineNum] + '\n'
+		err += ( ' ' * ( col - 1 ) ) + '^ here'
+		if printToStderrOnFatalError:
+			print( err, file=stderr )
+		raise TokenizerError(err)
 
 	while lineN < len(lines):
 		line = lines[lineN]
@@ -126,9 +129,9 @@ def parse(codeString: str, file: str) -> list[Token]:
 			code += [ Token( TokenType.KEYWORD, '', getLocation('DCLAR'), Keyword.DCLAR ) ]
 		elif getIsWord('FUNC'):
 			if len(code) == 0:
-				fatal('Expected DCLAR FUNC, found FUNC at line {lineN}', lineN, 0 )
+				fatal('Expected DCLAR FUNC, found FUNC at line {line}', lineN, 0 )
 			elif code[-1].typ != TokenType.KEYWORD and code[-1].value != Keyword.DCLAR and line[char + 2] != '[':
-				fatal('Expected DCLAR FUNC, found FUNC at line {lineN}', lineN, char )
+				fatal('Expected DCLAR FUNC, found FUNC at line {line}', lineN, char )
 			code += [ Token( TokenType.KEYWORD, '', getLocation('FUNC'), Keyword.FUNC ) ]
 		elif getIsWord('CONSTANT'):
 			assertIsKw( Keyword.DCLAR, Keyword.CONSTANT, getLocation('CONSTANT') )
