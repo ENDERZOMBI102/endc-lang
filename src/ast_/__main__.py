@@ -2,8 +2,10 @@ from time import time
 from pathlib import Path
 from sys import argv
 
+from utils import ExitError
 from . import parser, astPrinter
 from tokenizer import parse
+
 
 start = time()
 exitCode = 0
@@ -16,7 +18,8 @@ try:
 			)
 		).parse()
 	)
-except SystemExit as e:
+except ExitError as e:
 	exitCode = e.code
+
 print( f'Done in {time() - start}' )
 exit( exitCode )

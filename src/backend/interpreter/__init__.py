@@ -4,6 +4,10 @@ from ast_.expr import Visitor, Binary, Grouping, Literal, Unary, Expr
 from tokenizer import UnaryType
 
 
+class InterpreterError(Exception):
+	pass
+
+
 # noinspection PyMethodMayBeStatic
 class Interpreter(Visitor[object]):
 
@@ -15,6 +19,7 @@ class Interpreter(Visitor[object]):
 
 		# math
 		if op is UnaryType.SUBTRACT:
+			self.checkNumberOperand(op, right)
 			return float(left) - float(right)
 		elif op is UnaryType.DIVIDE:
 			return float(left) / float(right)
@@ -56,6 +61,8 @@ class Interpreter(Visitor[object]):
 	def evaluate( self, expr: Expr ) -> object:
 		return expr.accept(self)
 
+	# helper methods
+
 	def isTruthy( self, obj: object ) -> bool:
 		if obj is None:
 			return False
@@ -72,11 +79,16 @@ class Interpreter(Visitor[object]):
 			return False
 		return left == right
 
+	def checkNumberOperand( self, op: UnaryType, right: Any ) -> None:
+		if isinstance(right, float):
+			return
+		raise InterpreterError(op, 'Operand must be a number')
+
 
 def backendMain(ast: Expr) -> int:
 	try:
 		print( Interpreter().evaluate(ast) )
-	except Exception as e:
+	except InterpreterError as e:
 		print(e)
 		return 1
 	return 0

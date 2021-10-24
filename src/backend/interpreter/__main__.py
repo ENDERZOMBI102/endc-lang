@@ -6,7 +6,7 @@ from sys import argv
 from ast_.parser import Parser
 from backend.interpreter import Interpreter
 from tokenizer import parse
-
+from utils import ExitError
 
 start = time()
 exitCode = 0
@@ -21,7 +21,8 @@ try:
 			).parse()
 		)
 	)
-except SystemExit as e:
+except ExitError as e:
 	exitCode = e.code
+
 print(f'Done in {time() - start}')
 exit(exitCode)
