@@ -41,5 +41,4 @@ jobs:
           path: src
           
       - name: Python Unit Test
-        shell: python
-        run: python3.9 test.py
+        run: python3.9 -m unittest ${{ github.workspace }}/test.py
