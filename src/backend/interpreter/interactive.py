@@ -29,7 +29,7 @@ def interactiveMain() -> int:
 								inp,
 								'<stdin>'
 							)
-						).parse()
+						).parse()  # type: ignore
 					)
 				)
 			except tokenizer.TokenizerError as e:

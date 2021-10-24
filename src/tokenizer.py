@@ -80,17 +80,19 @@ class TokenizerError(Exception):
 	pass
 
 
-def parse(string: str, file: str) -> list[Token]:
-	lines: list[str] = string.splitlines(True)
+def parse(codeString: str, file: str) -> list[Token]:
+	lines: list[str] = codeString.splitlines(True)
 	code: list[Token] = []
 	lineN: int = 0
 	char: int = 0
+	# work vars
+	num: str
 
 	def getChar() -> str:
 		nonlocal char
 		return line[ ( char := char + 1 ) - 1 ] if char + 1 < len(line) else '\0'
 
-	def peek( offset = 1 ) -> str:
+	def peek( offset: int = 1 ) -> str:
 		return line[ char + offset ] if char + offset < len(line) else '\0'
 
 	def getIsWord( word: str ) -> bool:
@@ -124,9 +126,9 @@ def parse(string: str, file: str) -> list[Token]:
 			code += [ Token( TokenType.KEYWORD, '', getLocation('DCLAR'), Keyword.DCLAR ) ]
 		elif getIsWord('FUNC'):
 			if len(code) == 0:
-				fatal(f'Expected DCLAR FUNC, found FUNC at line {lineN}')
+				fatal('Expected DCLAR FUNC, found FUNC at line {lineN}', lineN, 0 )
 			elif code[-1].typ != TokenType.KEYWORD and code[-1].value != Keyword.DCLAR and line[char + 2] != '[':
-				fatal(f'Expected DCLAR FUNC, found FUNC at line {lineN}')
+				fatal('Expected DCLAR FUNC, found FUNC at line {lineN}', lineN, char )
 			code += [ Token( TokenType.KEYWORD, '', getLocation('FUNC'), Keyword.FUNC ) ]
 		elif getIsWord('CONSTANT'):
 			assertIsKw( Keyword.DCLAR, Keyword.CONSTANT, getLocation('CONSTANT') )
@@ -161,7 +163,7 @@ def parse(string: str, file: str) -> list[Token]:
 		elif getIsWord(','):
 			if peek(0) in '0123456789':
 				# leading dot float
-				num: str = '.'
+				num = '.'
 				while peek( 0 ) in '1234567890':
 					num += getChar()
 				fnum = float( num )
@@ -287,7 +289,7 @@ def parse(string: str, file: str) -> list[Token]:
 			char += 1
 			code += [ Token( TokenType.STR, string, getLocation(string), string ) ]
 		elif peek(0) in ',1234567890':
-			num: str = ''
+			num = ''
 			while peek(0) in ',1234567890':
 				num += getChar()
 			fnum = float( num.replace(',', '.') )

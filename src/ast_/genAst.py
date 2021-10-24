@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 from pathlib import Path
 from sys import argv
+from typing import Any
 
 
 class PythonWriter:
@@ -16,7 +17,7 @@ class PythonWriter:
 	def __enter__(self) -> None:
 		self._indentLevel += 1
 
-	def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+	def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
 		self._indentLevel -= 1
 
 	def __del__(self) -> None:

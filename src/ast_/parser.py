@@ -29,7 +29,7 @@ class Parser:
 	current: int = 0
 
 	def __init__(self, tokens: list[Token]) -> None:
-		self.tokens = tokens + [ Token(TokenType.EOF, '', None, None) ]
+		self.tokens = tokens + [ Token(TokenType.EOF, '', ('', 0, 0), '') ]
 
 	def parse( self ) -> Optional[Expr]:
 		try:

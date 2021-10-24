@@ -16,7 +16,7 @@ try:
 				Path( argv[ 1 ] ).read_text(),
 				argv[ 1 ]
 			)
-		).parse()
+		).parse()  # type: ignore
 	)
 except ExitError as e:
 	exitCode = e.code

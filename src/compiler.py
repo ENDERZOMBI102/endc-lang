@@ -3,7 +3,7 @@ import sys
 from json import loads
 from pathlib import Path
 from argparse import ArgumentParser
-from typing import Literal, cast, TextIO
+from typing import Literal, cast, TextIO, Optional, Union, Any
 from time import time
 from importlib import import_module
 
@@ -78,7 +78,7 @@ class Arguments:
 	backend: Literal['inter', 'llvm', 'wasm', 'py', 'jvm', 'neko', 'js']
 	showBackendHelp: bool
 	configFile: Path
-	postCompileScript: Path
+	postCompileScript: Optional[Path]
 	interactiveMode: bool
 	# 0: everything 1: warns up 2: only errors
 	verboseLevel: int
@@ -101,13 +101,13 @@ def main() -> int:
 	cfgFile = Path(args.configFile)
 	if cfgFile.exists():
 		print( f'[INFO] Using config at {cfgFile}' )
-		cfg: dict = loads( cfgFile.read_text() )
-		args.file = args.file or Path( cfg['defaultFile'] )
+		cfg: dict[ str, Union[ str, int ] ] = loads( cfgFile.read_text() )
+		args.file = args.file or Path( cast( str, cfg['defaultFile'] ) )
 		args.backend = args.backend or cfg.get('defaultBackend', 'inter')
-		args.verboseLevel = cfg.get( 'verboseLevel', args.verboseLevel )
+		args.verboseLevel = cast( int, cfg.get( 'verboseLevel', args.verboseLevel ) )
 		args.postCompileScript = (
 			args.postCompileScript or
-			Path( cfg.get('postCompileScript') ) if cfg.get('postCompileScript') else None
+			Path( cast( str, cfg.get('postCompileScript') ) ) if cfg.get('postCompileScript') else None
 		)
 
 	def log(verb: int, msg: str, file: TextIO = sys.stdout) -> None:
@@ -119,7 +119,7 @@ def main() -> int:
 	try:
 		# interactive mode
 		if args.interactiveMode:
-			return import_module( 'backend.interpreter.interactive' ).interactiveMain()
+			return cast( Any, import_module( 'backend.interpreter.interactive' ) ).interactiveMain()
 
 		if not args.file.exists():
 			log(2, f'[ERROR] File {args.file} not found.', sys.stderr)
@@ -131,6 +131,9 @@ def main() -> int:
 
 		log(0, f'[INFO] Generating AST..')
 		ast = ast_.parser.Parser( tokens ).parse()
+		if ast is None:
+			log( 2, f'[ERROR] Failed to generate AST, aborting.', sys.stderr )
+			return 1
 
 		log(0, f'[INFO] Selecting backend..')
 		if args.backend not in BACKENDS:

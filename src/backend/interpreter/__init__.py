@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, cast
 
 from ast_.expr import Visitor, Binary, Grouping, Literal, Unary, Expr
 from tokenizer import UnaryType
@@ -15,7 +15,7 @@ class Interpreter(Visitor[object]):
 		left: Any = self.evaluate(binary.left)
 		right: Any = self.evaluate(binary.right)
 
-		op: UnaryType = binary.operator.value
+		op: UnaryType = cast( UnaryType, binary.operator.value )
 
 		# math
 		if op is UnaryType.SUBTRACT:

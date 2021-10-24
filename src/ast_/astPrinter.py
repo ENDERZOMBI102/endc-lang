@@ -1,3 +1,5 @@
+from typing import cast
+
 from .expr import Visitor, Binary, Grouping, Literal, Unary, Expr
 
 
@@ -12,7 +14,7 @@ class AstPrinter(Visitor[str]):
 		return string + ')'
 
 	def visitBinaryExpr( self, binary: Binary ) -> str:
-		return self.parenthesize( binary.operator.value, binary.left, binary.right )
+		return self.parenthesize( cast( str, binary.operator.value ), binary.left, binary.right )
 
 	def visitGroupingExpr( self, grouping: Grouping ) -> str:
 		return self.parenthesize( 'group', grouping.expression )
@@ -23,21 +25,19 @@ class AstPrinter(Visitor[str]):
 		return str( literal.value )
 
 	def visitUnaryExpr( self, unary: Unary ) -> str:
-		return self.parenthesize( unary.operator.value, unary.right )
+		return self.parenthesize( cast( str, unary.operator.value ), unary.right )
 
 
 if __name__ == '__main__':
 	from tokenizer import Token, TokenType, UnaryType
 
-	print(
-		AstPrinter().print(
-			Binary(
-				Unary(
-					Token(TokenType.UNARY, '', None, UnaryType.SUBTRACT ),
-					Literal(123)
-				),
-				Token(TokenType.UNARY, '', None, UnaryType.ADD),
-				Grouping( Literal(45.67) )
-			)
+	AstPrinter().print(
+		Binary(
+			Unary(
+				Token(TokenType.UNARY, '', ('', 0, 0), UnaryType.SUBTRACT ),
+				Literal(123)
+			),
+			Token(TokenType.UNARY, '', ('', 0, 0), UnaryType.ADD),
+			Grouping( Literal(45.67) )
 		)
 	)
