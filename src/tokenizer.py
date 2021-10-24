@@ -76,6 +76,10 @@ class Token:
 	value: Union[float, str, Keyword, UnaryType]
 
 
+class TokenizerError(Exception):
+	pass
+
+
 def parse(string: str, file: str) -> list[Token]:
 	lines: list[str] = string.splitlines(True)
 	code: list[Token] = []
@@ -111,7 +115,7 @@ def parse(string: str, file: str) -> list[Token]:
 		print( f'ERROR: File "{file}", line {lineNum+1} - {message.format(line=lineNum + 1, char=col)}', file=stderr )
 		print( lines[lineNum], file=stderr )
 		print( ( ' ' * ( col - 1 ) ) + '^ here', file=stderr, flush=True )
-		exit(1)
+		raise TokenizerError()
 
 	while lineN < len(lines):
 		line = lines[lineN]
@@ -307,6 +311,10 @@ if __name__ == '__main__':
 	from pathlib import Path
 	from pprint import pprint
 	from sys import argv
+
+	from utils import ExitError
+
+
 	start = time()
 	exitCode = 0
 	try:
@@ -316,7 +324,8 @@ if __name__ == '__main__':
 				argv[1]
 			)
 		)
-	except SystemExit as e:
+	except ExitError as e:
 		exitCode = e.code
+
 	print(f'Done in {time() - start}')
 	exit(exitCode)

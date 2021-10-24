@@ -10,6 +10,7 @@ from importlib import import_module
 from backend import Backend, BACKENDS
 import ast_.parser
 import tokenizer
+from utils import ExitError
 
 parser = ArgumentParser(
 	prog='compiler.py' if getattr(sys, 'frozen', False) else 'endcc',
@@ -150,7 +151,7 @@ def main() -> int:
 				log(0, f'[INFO] Executing post compile script "{args.postCompileScript}"..')
 				os.system( f'{sys.executable} {args.postCompileScript} {args.file.absolute()} {args.backend}' )
 
-	except SystemExit as e:
+	except ExitError as e:
 		return e.code
 	return exitCode
 
