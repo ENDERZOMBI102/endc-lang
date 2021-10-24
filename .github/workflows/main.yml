@@ -41,4 +41,5 @@ jobs:
           path: src
           
       - name: Python Unit Test
-        run: sh ./test.sh
+        shell: python
+        run: python3.9 test.py
