@@ -13,7 +13,7 @@ class ExpressionTest(TestCase):
 		# one line comments
 		with self.assertRaises(TokenizerError):
 			tokenizer.parse( '|* comment test *|', '<test>' )
-		# opening curly brace without word/func
+		# opening curly brace without word/func/expression
 		with self.assertRaises(TokenizerError):
 			tokenizer.parse( '{', '<test>' )
 		# FUNC without DCLAR or CALL
