@@ -1,3 +1,6 @@
+"""
+Interpreter backend for the endc compiler.
+"""
 from typing import Any, cast
 
 from ast_.expr import Visitor, Binary, Grouping, Literal, Unary, Expr

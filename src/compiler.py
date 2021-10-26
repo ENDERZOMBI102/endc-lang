@@ -1,3 +1,11 @@
+"""
+Main file of the endc compiler.
+Connects all the pieces together.
+
+ - Uses the cli arguments to run the correct backend with valid parameters.
+ - Tracks how much time the compilation process took.
+"""
+
 import os
 import sys
 from json import loads

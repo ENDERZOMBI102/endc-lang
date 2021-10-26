@@ -1,3 +1,7 @@
+"""
+Interprets a given file
+"""
+
 import sys
 from time import time
 from pathlib import Path

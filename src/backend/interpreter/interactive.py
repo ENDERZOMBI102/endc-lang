@@ -1,4 +1,7 @@
-import traceback
+"""
+Interactive intepreter implementation.
+"""
+
 from sys import stderr
 
 import ast_.parser

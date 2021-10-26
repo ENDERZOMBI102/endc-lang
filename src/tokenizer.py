@@ -1,3 +1,7 @@
+"""
+Transforms a string into a stream/list of tokens, while performing a basic syntax check
+"""
+
 from sys import stderr
 from dataclasses import dataclass
 from enum import auto, Enum

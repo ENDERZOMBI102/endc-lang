@@ -1,35 +1,38 @@
+"""
+Unit Tests for all EndC compiler modules
+"""
+
+import sys; sys.path.append('src')
 from pathlib import Path
 from unittest import main, TestCase
-import sys
 
-sys.path.append('src')
-
-from tokenizer import TokenizerError
 import tokenizer
+from ast_ import parser
+from backend import interpreter
 
 
 class ExpressionTest(TestCase):
 	def testTokenizerWithBadCode( self ) -> None:
 		# one line comments
-		with self.assertRaises(TokenizerError):
+		with self.assertRaises( tokenizer.TokenizerError ):
 			tokenizer.parse( '|* comment test *|', '<test>' )
 		# opening curly brace without word/func/expression
-		with self.assertRaises(TokenizerError):
+		with self.assertRaises( tokenizer.TokenizerError ):
 			tokenizer.parse( '{', '<test>' )
 		# FUNC without DCLAR or CALL
-		with self.assertRaises(TokenizerError):
+		with self.assertRaises( tokenizer.TokenizerError ):
 			tokenizer.parse( 'FUNC', '<test>' )
 		# unfinished string
-		with self.assertRaises( TokenizerError ):
+		with self.assertRaises( tokenizer.TokenizerError ):
 			tokenizer.parse( '*/\n', '<test>' )
 		# CONSTANT without DCLAR
-		with self.assertRaises( TokenizerError ):
+		with self.assertRaises( tokenizer.TokenizerError ):
 			tokenizer.parse( 'CONSTANT', '<test>' )
 		# BACK without GIV
-		with self.assertRaises( TokenizerError ):
+		with self.assertRaises( tokenizer.TokenizerError ):
 			tokenizer.parse( 'BACK', '<test>' )
 		# line without /
-		with self.assertRaises( TokenizerError ):
+		with self.assertRaises( tokenizer.TokenizerError ):
 			tokenizer.parse( 'GIV BACK 0', '<test>' )
 
 	def testTokenizerWithGoodCode( self ) -> None:
@@ -37,7 +40,30 @@ class ExpressionTest(TestCase):
 			with self.subTest():
 				try:
 					tokenizer.parse( example.read_text(), example.name )
-				except TokenizerError as e:
+				except tokenizer.TokenizerError as e:
+					assert False, f'Failed on example "{example.name}": {e.args}'
+
+	def testParserWithGoodCode( self ) -> None:
+		for example in Path('examples').glob('*.endc'):
+			with self.subTest():
+				try:
+					parser.Parser( tokenizer.parse( example.read_text(), example.name ) ).parse()
+				except parser.ParseError as e:
+					assert False, f'Failed on example "{example.name}": {e.args}'
+
+	def testInterpreterWithGoodCode( self ) -> None:
+		for example in Path('examples').glob('*.endc'):
+			with self.subTest():
+				try:
+					interpreter.Interpreter().interpret(
+						parser.Parser(
+							tokenizer.parse(
+								example.read_text(),
+								example.name
+							)
+						).parse()
+					)
+				except parser.ParseError as e:
 					assert False, f'Failed on example "{example.name}": {e.args}'
 
 

@@ -1,3 +1,7 @@
+"""
+Tries to parse the given file into an AST.
+"""
+
 from time import time
 from pathlib import Path
 from sys import argv

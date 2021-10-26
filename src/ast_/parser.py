@@ -1,3 +1,7 @@
+"""
+Parsers a stream/list of tokens into an abstract binary tree, while doing a intermediate syntax check
+"""
+
 from typing import Final, Union, Optional
 
 from ast_.expr import Expr, Binary, Unary, Literal, Grouping

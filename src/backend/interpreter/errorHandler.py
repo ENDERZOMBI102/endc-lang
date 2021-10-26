@@ -1,3 +1,7 @@
+"""
+Interpreter error handler
+"""
+
 import traceback
 
 

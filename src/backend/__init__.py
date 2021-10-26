@@ -1,3 +1,7 @@
+"""
+Contains info about the compiler backends and a abstract class representing them.
+"""
+
 from dataclasses import dataclass
 
 from ast_.expr import Expr

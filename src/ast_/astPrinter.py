@@ -1,3 +1,8 @@
+"""
+Given an AST, pretty prints it.
+"""
+
+
 from typing import cast
 
 from .expr import Visitor, Binary, Grouping, Literal, Unary, Expr
