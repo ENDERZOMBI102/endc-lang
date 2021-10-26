@@ -1,10 +1,12 @@
 from typing import Any, cast
 
 from ast_.expr import Visitor, Binary, Grouping, Literal, Unary, Expr
+from backend.interpreter import errorHandler
 from tokenizer import UnaryType
+from utils import ExitError
 
 
-class InterpreterError(Exception):
+class InterpreterError(RuntimeError):
 	pass
 
 
@@ -42,7 +44,7 @@ class Interpreter(Visitor[object]):
 		return None
 
 	def visitGroupingExpr( self, grouping: Grouping ) -> object:
-		return self.evaluate( grouping )
+		return self.evaluate( grouping.expression )
 
 	def visitLiteralExpr( self, literal: Literal ) -> object:
 		return literal.value
@@ -59,7 +61,9 @@ class Interpreter(Visitor[object]):
 		return None
 
 	def evaluate( self, expr: Expr ) -> object:
-		return expr.accept(self)
+		if isinstance(expr, Expr):
+			return expr.accept(self)
+		return expr
 
 	# helper methods
 
@@ -84,10 +88,32 @@ class Interpreter(Visitor[object]):
 			return
 		raise InterpreterError(op, 'Operand must be a number')
 
+	def stringify( self, obj: Any ) -> str:
+		if obj is None:
+			return 'NOTHING'
+		elif isinstance( obj, float ):
+			txt: str = str(obj)
+			if txt.endswith('.0'):
+				return txt[:-2]
+		elif isinstance( obj, str ):
+			return f'*{obj}*'
+
+		return str(obj)
+
+	def interpret( self, expr: Expr ) -> None:
+		try:
+			obj = self.evaluate( expr )
+			print( self.stringify(obj) )
+		except InterpreterError as e:
+			raise ExitError(
+				-1,
+				f'Implementation error: {errorHandler.getTracebackText(e)}'
+			)
+
 
 def backendMain(ast: Expr) -> int:
 	try:
-		print( Interpreter().evaluate(ast) )
+		Interpreter().evaluate(ast)
 	except InterpreterError as e:
 		print(e)
 		return 1
