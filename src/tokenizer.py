@@ -1,7 +1,7 @@
 from sys import stderr
 from dataclasses import dataclass
 from enum import auto, Enum
-from typing import Union
+from typing import Union, Optional
 
 Loc = tuple[ str, int, int ]
 printToStderrOnFatalError: bool = False
@@ -77,8 +77,9 @@ class Token:
 	value: Union[float, str, Keyword, UnaryType]
 
 
+@dataclass
 class TokenizerError(Exception):
-	pass
+	message: Optional[str] = None
 
 
 def parse(codeString: str, file: str) -> list[Token]:
@@ -178,13 +179,9 @@ def parse(codeString: str, file: str) -> list[Token]:
 		elif getIsWord('.'):
 			code += [ Token( TokenType.KEYWORD, '', getLocation('.'), Keyword.Dot ) ]
 		elif getIsWord( '{' ):
-			if len( code ) < 1:
-				fatal(
-					'at {line}:{char} opening bracket cannot open an expression/statement',
-					lineN,
-					char
-				)
 			if (
+					len(code) != 0 and
+					peek() not in ',1234567890' and
 					code[-1].value != Keyword.FUNC and
 					code[-1].value != Keyword.BracketClose and
 					code[-1].value != Keyword.IF and
@@ -196,10 +193,18 @@ def parse(codeString: str, file: str) -> list[Token]:
 					char
 				)
 			if (
-					code[-1].typ == TokenType.NAME and
-					code[-2].value != Keyword.CALL and
-					code[-2].value != Keyword.IF and
-					code[-2].value != Keyword.FUNC
+					(
+							len(code) < 2 and
+							len( code ) != 0 and
+							peek() not in ',1234567890'
+					) or (
+						len( code ) != 0 and
+						peek() not in ',1234567890' and
+						code[-1].typ == TokenType.NAME and
+						code[-2].value != Keyword.CALL and
+						code[-2].value != Keyword.IF and
+						code[-2].value != Keyword.FUNC
+					)
 			):
 				fatal(
 					'missing FUNC or CALL keyword at {line}:{char}',
@@ -294,7 +299,14 @@ def parse(codeString: str, file: str) -> list[Token]:
 		elif peek(0) in ',1234567890':
 			num = ''
 			while peek(0) in ',1234567890':
-				num += getChar()
+				if ( numChar := getChar() ) != '\0':
+					num += numChar
+				else:
+					fatal(
+						'Reached end of line without ending /',
+						lineN,
+						char + len(num)
+					)
 			fnum = float( num.replace(',', '.') )
 			code += [ Token( TokenType.FLOAT, '', getLocation( str( fnum ) ), fnum ) ]
 		else:
