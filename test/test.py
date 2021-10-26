@@ -2,10 +2,10 @@ from pathlib import Path
 from unittest import main, TestCase
 import sys
 
+sys.path.append('src')
+
 from tokenizer import TokenizerError
 import tokenizer
-
-sys.path.append('src')
 
 
 class ExpressionTest(TestCase):
