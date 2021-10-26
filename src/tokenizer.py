@@ -97,6 +97,11 @@ def parse(codeString: str, file: str) -> list[Token]:
 	def peek( offset: int = 1 ) -> str:
 		return line[ char + offset ] if char + offset < len(line) else '\0'
 
+	def peekIgnoreSpaces( offset: int = 1 ) -> str:
+		while peek(offset) == ' ':
+			offset += 1
+		return line[ char + offset ] if char + offset < len(line) else '\0'
+
 	def getIsWord( word: str ) -> bool:
 		nonlocal char
 		if line[ char : char + len(word) ] == word:
@@ -180,18 +185,22 @@ def parse(codeString: str, file: str) -> list[Token]:
 			code += [ Token( TokenType.KEYWORD, '', getLocation('.'), Keyword.Dot ) ]
 		elif getIsWord( '{' ):
 			if (
-					len(code) != 0 and
-					peek() not in ',1234567890' and
-					code[-1].value != Keyword.FUNC and
-					code[-1].value != Keyword.BracketClose and
-					code[-1].value != Keyword.IF and
-					code[-1].typ != TokenType.NAME
+					len( code ) == 0 or
+					peekIgnoreSpaces() not in ',1234567890'
 			):
-				fatal(
-					'at {line}:{char} opening bracket can only go after a name, a FUNC, a IF or a ] keyword',
-					lineN,
-					char
-				)
+				if (
+					len( code ) == 0 or (
+						code[-1].value != Keyword.FUNC and
+						code[-1].value != Keyword.BracketClose and
+						code[-1].value != Keyword.IF and
+						code[-1].typ != TokenType.NAME
+					)
+				):
+					fatal(
+						'at {line}:{char} opening brace can only go after a name, a FUNC, a IF, a ] keyword or before an expression',
+						lineN,
+						char
+					)
 			if (
 					(
 							len(code) < 2 and
