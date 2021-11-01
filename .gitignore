@@ -2,3 +2,4 @@
 .mypy_cache
 onCompileEnd.py
 examples/test.endc
+**/__pycache__
