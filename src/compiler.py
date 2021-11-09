@@ -10,7 +10,7 @@ import os
 import sys
 from json import loads
 from pathlib import Path
-from typing import cast, TextIO, Union
+from typing import cast, Union
 from time import time
 from importlib import import_module
 
@@ -18,6 +18,7 @@ from backend import BACKENDS
 import ast_.parser
 import tokenizer
 from cli import args
+from log import warn, info, error
 from utils import ExitError
 
 
@@ -35,7 +36,7 @@ def main() -> int:
 	# config file defaults
 	cfgFile = Path(args.configFile)
 	if cfgFile.exists():
-		print( f'[INFO] Using config at {cfgFile}' )
+		info( f'Using config at {cfgFile}' )
 		cfg: dict[ str, Union[ str, int ] ] = loads( cfgFile.read_text() )
 		args.file = args.file or Path( cast( str, cfg['defaultFile'] ) )
 		args.backend = args.backend or cfg.get('defaultBackend', 'inter')
@@ -45,10 +46,6 @@ def main() -> int:
 			Path( cast( str, cfg.get('postCompileScript') ) ) if cfg.get('postCompileScript') else None
 		)
 
-	def log(verb: int, msg: str, file: TextIO = sys.stdout) -> None:
-		if args.verboseLevel <= verb:
-			print(msg, file=file)
-
 	exitCode: int = 0
 	# execute build
 	try:
@@ -57,36 +54,36 @@ def main() -> int:
 			return import_module( 'backend.interpreter.interactive' ).interactiveMain()  # type: ignore
 
 		if not args.file.exists():
-			log(2, f'[ERROR] File {args.file} not found.', sys.stderr)
+			error( f'[ERROR] File {args.file} not found.')
 			return 1
-		log(0, f'[INFO] Compiling {args.file}')
+		info( f'[INFO] Compiling {args.file}')
 
-		log(0, f'[INFO] Tokenizing..')
+		info( f'[INFO] Tokenizing..')
 		tokens = tokenizer.parse( args.file.read_text(), str( args.file ) )
 
-		log(0, f'[INFO] Generating AST..')
+		info( f'[INFO] Generating AST..')
 		ast = ast_.parser.Parser( tokens ).parse()
 		if ast is None:
-			log( 2, f'[ERROR] Failed to generate AST, aborting.', sys.stderr )
+			error( f'[ERROR] Failed to generate AST, aborting.' )
 			return 1
 
-		log(0, f'[INFO] Selecting backend..')
+		info( f'[INFO] Selecting backend..')
 		if args.backend not in BACKENDS:
-			log( 2, f'[ERROR] Trying to use invalid backend ({args.backend}), aborting.', sys.stderr )
+			error( f'[ERROR] Trying to use invalid backend ({args.backend}), aborting.' )
 			return 1
 		backend = BACKENDS[args.backend]
 		if not backend.available:
-			log(2, f'[ERROR] Selected backend ({backend.name}) is not available, aborting.', sys.stderr)
+			error( f'[ERROR] Selected backend ({backend.name}) is not available, aborting.')
 			return 1
 
-		log(0, f'[INFO] Executing backend "{backend.name}"..')
+		info( f'[INFO] Executing backend "{backend.name}"..')
 		exitCode: int = import_module( backend.pkg ).backendMain(ast)  # type: ignore
 
 		if args.postCompileScript:
 			if not args.postCompileScript.exists():
-				log(1, f'[WARN] Post compile script "{args.postCompileScript}" does not exist.')
+				warn( f'[WARN] Post compile script "{args.postCompileScript}" does not exist.')
 			else:
-				log(0, f'[INFO] Executing post compile script "{args.postCompileScript}"..')
+				info( f'[INFO] Executing post compile script "{args.postCompileScript}"..')
 				os.system( f'{sys.executable} {args.postCompileScript} {args.file.absolute()} {args.backend}' )
 
 	except ExitError as e:

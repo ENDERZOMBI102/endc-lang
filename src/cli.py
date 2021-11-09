@@ -5,7 +5,9 @@ Module containing the CLI interface code (mainly argument parsing)
 import sys
 from argparse import ArgumentParser
 from pathlib import Path
-from typing import Optional, Literal
+from typing import Optional
+
+from platforms import Platform
 
 parser = ArgumentParser(
 	prog='compiler.py' if getattr(sys, 'frozen', False) else 'endcc',
@@ -24,7 +26,7 @@ parser.add_argument(
 	'--backend',
 	help='Must be one of "inter", "llvm", "wasm", "py", "jvm", "neko" or "js"',
 	action='store',
-	type=str,
+	type=Platform.findAdeguate,
 	dest='backend'
 )
 parser.add_argument(
@@ -39,7 +41,7 @@ parser.add_argument(
 parser.add_argument(
 	'-a',
 	'--aftercomp',
-	help='Sets the python script exececuted after compile to the provided file',
+	help='Sets the python script executed after compile to the provided file',
 	action='store',
 	type=Path,
 	dest='postCompileScript'
@@ -73,11 +75,19 @@ parser.add_argument(
 	default=False,
 	dest='exitOnImplementationError'
 )
+parser.add_argument(
+	'-dg'
+	'--debug',
+	help='Enables compiler debug mode',
+	action='store_true',
+	default=False,
+	dest='debug'
+)
 
 
 class Arguments:
 	file: Path
-	backend: Literal['inter', 'llvm', 'wasm', 'py', 'jvm', 'neko', 'js']
+	backend: Platform
 	showBackendHelp: bool
 	configFile: Path
 	postCompileScript: Optional[Path]
@@ -85,6 +95,8 @@ class Arguments:
 	exitOnImplementationError: bool
 	# 0: everything 1: warns up 2: only errors
 	verboseLevel: int
+	# debug mode, enable debug logging
+	debug: bool
 
 
 # cli arguments

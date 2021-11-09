@@ -7,15 +7,25 @@ from sys import stderr
 import ast_.parser
 import tokenizer
 from cli import args
+from log import error
 from . import Interpreter, InterpreterError, errorHandler
 
 
 def interactiveMain() -> int:
 	intpr = Interpreter()
 	while True:
-		inp = input('>>> ')
+		inp: str
+		try:
+			inp = input('>>> ')
+		except EOFError:
+			return 0
+		# as we're in the interactive interpreter, we can be a little more forgiving
+		if not inp.endswith('/'):
+			inp += '/'
+		# is it a exit call?
 		if inp.startswith('CALL xit{'):
 			if inp.endswith('}/'):
+				# parse exit code
 				exitCode = inp.removeprefix('CALL xit{').removesuffix('}/')
 				if exitCode == '':
 					exitCode = '0'
@@ -26,6 +36,7 @@ def interactiveMain() -> int:
 			else:
 				print( 'missing / at end of input', file=stderr )
 		else:
+			# its not, interpret it
 			try:
 				intpr.interpret(
 					ast_.parser.Parser(
@@ -36,16 +47,12 @@ def interactiveMain() -> int:
 					).parse()  # type: ignore
 				)
 			except tokenizer.TokenizerError as e:
-				print(f'Failed to tokenize expression: {e.args[0]}', file=stderr)
+				error( f'Failed to tokenize expression: {e.args[0]}' )
 			except ast_.parser.ParseError as e:
-				print(f'Failed to parse expression: "{e.args[0]}"', file=stderr)
+				error( f'Failed to parse expression: "{e.args[0]}"' )
 			except InterpreterError as e:
-				print(f'Interpreter error: {e.args[0]}: {e.args[1]}', file=stderr)
+				error( f'Interpreter error: {e.args[0]}: {e.args[1]}' )
 			except Exception as e:
-				print(
-					'Implementation error: ' + errorHandler.getTracebackText(e),
-					file=stderr
-				)
-				import compiler
+				error( f'Implementation error: {errorHandler.getTracebackText(e)}' )
 				if args.exitOnImplementationError:
 					return -1
