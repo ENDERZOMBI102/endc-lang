@@ -20,6 +20,7 @@ import tokenizer
 from cli import args
 from log import warn, info, error
 from utils import ExitError
+from platforms import Platform
 
 
 def main() -> int:
@@ -39,7 +40,7 @@ def main() -> int:
 		info( f'Using config at {cfgFile}' )
 		cfg: dict[ str, Union[ str, int ] ] = loads( cfgFile.read_text() )
 		args.file = args.file or Path( cast( str, cfg['defaultFile'] ) )
-		args.backend = args.backend or cfg.get('defaultBackend', 'inter')
+		args.backend = args.backend or cast( Platform, cfg.get('defaultBackend', 'inter') )
 		args.verboseLevel = cast( int, cfg.get( 'verboseLevel', args.verboseLevel ) )
 		args.postCompileScript = (
 			args.postCompileScript or
