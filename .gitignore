@@ -3,3 +3,5 @@
 onCompileEnd.py
 examples/test.endc
 **/__pycache__
+build
+dist

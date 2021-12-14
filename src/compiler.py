@@ -8,6 +8,7 @@ Connects all the pieces together.
 
 import os
 import sys
+from sys import exit
 from json import loads
 from pathlib import Path
 from typing import cast, Union
@@ -27,7 +28,7 @@ def main() -> int:
 	if args.execPyFile is not None:
 		# just exec the py file
 		sys.argv = args.execPyArgs
-		exec( Path(args.execPyFile).read_text(), __locals={}, __globals={} )
+		exec( Path(args.execPyFile).read_text(), {}, {} )
 		exit(0)
 
 	# backend help (--backed-info)
@@ -46,7 +47,7 @@ def main() -> int:
 		print( f'[INFO] Using config at {cfgFile}' )
 		cfg: dict[ str, Union[ str, int ] ] = loads( cfgFile.read_text() )
 		args.file = args.file or Path( cast( str, cfg['defaultFile'] ) )
-		args.backend = args.backend or cast( Platform, cfg.get('defaultBackend', 'inter') )
+		args.backend = args.backend or Platform.findAdeguate( cfg.get('defaultBackend', 'inter') )
 		args.verboseLevel = cast( int, cfg.get( 'verboseLevel', args.verboseLevel ) )
 		args.postCompileScript = (
 			args.postCompileScript or
@@ -75,7 +76,6 @@ def main() -> int:
 			return 1
 
 		info( f'Selecting backend..')
-		from platforms import Platform
 		try:
 			args.backend = Platform.findAdeguate( args.backend )
 		except ValueError:
@@ -94,7 +94,7 @@ def main() -> int:
 				warn( f'Post compile script "{args.postCompileScript}" does not exist.')
 			else:
 				info( f'Executing post compile script "{args.postCompileScript}"..')
-				os.system( f'{sys.executable} --execpyfile {args.postCompileScript} {args.file.absolute()} {args.backend}' )
+				os.system( f'{sys.executable} --execpyfile {args.postCompileScript} --execpyargs {args.file.absolute()} {args.backend}' )
 
 	except ExitError as e:
 		return e.code

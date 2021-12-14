@@ -77,7 +77,7 @@ parser.add_argument(
 	dest='exitOnImplementationError'
 )
 parser.add_argument(
-	'-dg'
+	'-dg',
 	'--debug',
 	help='Enables compiler debug mode',
 	action='store_true',
