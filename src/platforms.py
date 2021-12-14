@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Union
 
 
 class Platform(Enum):
@@ -11,9 +12,11 @@ class Platform(Enum):
 	PYTHON = 'py'
 	JAVASCRIPT = 'js'
 
-	@staticmethod
-	def findAdeguate(name: str) -> 'Platform':
-		for platform in Platform:
+	@classmethod
+	def findAdeguate( cls, name: Union[ str, 'Platform' ] ) -> 'Platform':
+		if isinstance( name, Platform ):
+			return name
+		for platform in cls:
 			if platform.value == name:
 				return platform
 		raise ValueError(f'Platform not found: {name}')

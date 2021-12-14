@@ -8,3 +8,7 @@ Table of contents:
 	- genAst: Tool to generate the AST classes
 	- parser: Parses a stream of tokens into an AST
 """
+
+
+class ParseError(RuntimeError):
+	pass

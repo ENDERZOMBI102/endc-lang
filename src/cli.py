@@ -1,7 +1,7 @@
 """
 Module containing the CLI interface code (mainly argument parsing)
 """
-
+import argparse
 import sys
 from argparse import ArgumentParser
 from pathlib import Path
@@ -51,6 +51,7 @@ parser.add_argument(
 	'--verbosity',
 	help='Sets the verbosity of the log (0: everything 1: warns+errors 2: errors)',
 	action='store',
+	# default=1,
 	type=int,
 	dest='verboseLevel'
 )
@@ -83,6 +84,20 @@ parser.add_argument(
 	default=False,
 	dest='debug'
 )
+parser.add_argument(
+	'--execpyfile',
+	help=argparse.SUPPRESS,
+	action='store',
+	default=None,
+	dest='execPyFile'
+)
+parser.add_argument(
+	'--execpyargs',
+	help=argparse.SUPPRESS,
+	nargs='*',
+	action='store',
+	dest='execPyArgs'
+)
 
 
 class Arguments:
@@ -97,6 +112,9 @@ class Arguments:
 	verboseLevel: int
 	# debug mode, enable debug logging
 	debug: bool
+	# for when we're compiled
+	execPyFile: str
+	execPyArgs: list[str]
 
 
 # cli arguments

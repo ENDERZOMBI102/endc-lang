@@ -53,7 +53,7 @@ class ExpressionTest(TestCase):
 
 	def testInterpreterWithGoodCode( self ) -> None:
 		for example in Path('examples').glob('*.endc'):
-			with self.subTest():
+			with self.subTest(f'Testing {example}'):
 				try:
 					interpreter.Interpreter().interpret(
 						parser.Parser(

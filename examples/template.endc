@@ -1,10 +1,24 @@
 XPORT TMPLAT TsTtMpLaT [
+     |* Called on template init
+     *|
      DCLAR FUNC init{} [
           DCLAR CONSTANT StRiNg tsttmplat_ = *initiated */
-          CALL printto{tsttmplat_ - M,tmplatnam}/
+          |* M is python's self, tmplatname is a metaconstant that stores the template's name
+          *|
+          CALL printto{ STDOUT. tsttmplat_ - M,tmplatnam }/
      ]
+     DCLAR FUNC hllo{} [
+          DCLAR CONSTANT StRiNg tsttmplat_ = *hello world! */
+          CALL printto{ STDOUT. tsttmplat_ - M,tmplatnam }/
+     ]
+     |* Called on template destruction
+     *|
      DCLAR FUNC uninit{} [
           DCLAR CONSTANT StRiNg tsttmplat_ = *deinitiated */
-          CALL printto{tsttmplat_ - M,tmplatnam}/
+          CALL printto{ STDOUT. tsttmplat_ - M,tmplatnam }/
      ]
 ]
+
+|* first builds the template, as its inside {}, then call hllo{}
+*|
+CALL { CALL BUILD TsTtMpLaT{} },hllo{}/

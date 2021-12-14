@@ -4,6 +4,7 @@ Parsers a stream/list of tokens into an abstract binary tree, while doing a inte
 
 from typing import Final, Union, Optional
 
+from ast_ import ParseError
 from ast_.expr import Expr, Binary, Unary, Literal, Grouping
 from tokenizer import Token, Keyword, TokenType, UnaryType
 
@@ -22,10 +23,6 @@ def error(token: Token, message: str) -> None:
 		report( token.loc[1], 'at end', message )
 	else:
 		report( token.loc[1], f"at '{token.value}'", message )
-
-
-class ParseError(RuntimeError):
-	pass
 
 
 class Parser:

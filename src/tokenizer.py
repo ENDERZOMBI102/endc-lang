@@ -30,6 +30,7 @@ class Keyword(Enum):
 	BACK = auto()  # BACK
 	TMPLAT = auto()  # TMPLAT
 	WHIL = auto()  # WHIL
+	BUILD = auto()  # BUILD
 	# COMMENTS
 	CommentOpen = auto()  # |*
 	CommentText = auto()  # |* THIS TEXT *|
@@ -87,6 +88,12 @@ class TokenizerError(Exception):
 
 
 def parse(codeString: str, file: str) -> list[Token]:
+	"""
+	Parses a string of code into a list of tokens
+	:param codeString: code string
+	:param file: original file
+	:return: list of tokens
+	"""
 	lines: list[str] = codeString.splitlines(True)
 	code: list[Token] = []
 	lineN: int = 0
@@ -95,18 +102,22 @@ def parse(codeString: str, file: str) -> list[Token]:
 	num: str
 
 	def getChar() -> str:
+		""" Returns and consume a char """
 		nonlocal char
 		return line[ ( char := char + 1 ) - 1 ] if char + 1 < len(line) else '\0'
 
 	def peek( offset: int = 1 ) -> str:
+		""" Returns a char """
 		return line[ char + offset ] if char + offset < len(line) else '\0'
 
 	def peekIgnoreSpaces( offset: int = 1 ) -> str:
+		""" Returns a word """
 		while peek(offset) == ' ':
 			offset += 1
 		return line[ char + offset ] if char + offset < len(line) else '\0'
 
 	def getIsWord( word: str ) -> bool:
+		""" Check if the next word is the give word """
 		nonlocal char
 		if line[ char : char + len(word) ] == word:
 			char += len(word)
@@ -114,9 +125,18 @@ def parse(codeString: str, file: str) -> list[Token]:
 		return False
 
 	def getLocation(word: str = '') -> Loc:
+		""" Create a Location tuple """
 		return file, lineN, char - ( len(word) - 1 )
 
 	def assertIsKw(kw: Keyword, curr: Keyword, loc: Loc, offset: int = 0) -> None:
+		"""
+		Raises a fatal exception if the token at $offset is not the given keyword
+		:param kw: Expected keyword
+		:param curr: Current keywordthat requires the check
+		:param loc: Current keyword's location tuple
+		:param offset: Offset to check
+		:raises TokenizerError: When the token is wrong
+		"""
 		if len(code) == 0 or code[ -1 + offset ].typ != TokenType.KEYWORD or code[ -1 + offset ].value != kw:
 			fatal(
 				f'Missing {kw.name} keyword before {curr.name} keyword at line ' '{line} column {char}',
@@ -125,6 +145,12 @@ def parse(codeString: str, file: str) -> list[Token]:
 			)
 
 	def fatal(message: str, lineNum: int, col: int) -> None:
+		"""
+		Raise an exception with debug information
+		:param message: Message of the exception
+		:param lineNum: Line where the error originated
+		:param col: Column where the error originated
+		"""
 		err = f'ERROR: File "{file}", line { lineNum + 1 } - {message.format(line=lineNum + 1, char=col)}\n'
 		err += lines[lineNum] + '\n'
 		err += ( ' ' * ( col - 1 ) ) + '^ here'
@@ -132,6 +158,7 @@ def parse(codeString: str, file: str) -> list[Token]:
 			print( err, file=stderr )
 		raise TokenizerError(err)
 
+	# execute until there are no more lines
 	while lineN < len(lines):
 		line = lines[lineN]
 
@@ -151,6 +178,8 @@ def parse(codeString: str, file: str) -> list[Token]:
 			code += [ Token( TokenType.KEYWORD, '', getLocation( 'VARIABL' ), Keyword.VARIABL ) ]
 		elif getIsWord('CALL'):
 			code += [ Token( TokenType.KEYWORD, '', getLocation('CALL'), Keyword.CALL ) ]
+		elif getIsWord('BUILD'):
+			code += [ Token( TokenType.KEYWORD, '', getLocation('BUILD'), Keyword.BUILD ) ]
 		elif getIsWord('OWN'):
 			code += [ Token( TokenType.KEYWORD, '', getLocation('OWN'), Keyword.OWN ) ]
 		elif getIsWord('XPORT'):
@@ -197,6 +226,7 @@ def parse(codeString: str, file: str) -> list[Token]:
 						code[-1].value != Keyword.FUNC and
 						code[-1].value != Keyword.BracketClose and
 						code[-1].value != Keyword.IF and
+						code[-1].value != Keyword.CALL and
 						code[-1].typ != TokenType.NAME
 					)
 				):
@@ -215,6 +245,8 @@ def parse(codeString: str, file: str) -> list[Token]:
 						peek() not in ',1234567890' and
 						code[-1].typ == TokenType.NAME and
 						code[-2].value != Keyword.CALL and
+						code[-2].value != Keyword.BUILD and
+						code[-2].value != Keyword.Comma and
 						code[-2].value != Keyword.IF and
 						code[-2].value != Keyword.FUNC
 					)
@@ -343,7 +375,6 @@ if __name__ == '__main__':
 	from sys import argv
 
 	from utils import ExitError
-
 
 	start = time()
 	exitCode = 0
