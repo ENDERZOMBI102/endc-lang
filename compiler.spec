@@ -20,7 +20,13 @@ analysis = Analysis(
 	hookspath=[ ],
 	hooksconfig={},
 	runtime_hooks=[ ],
-	excludes=[ ],
+	excludes=[
+		'asyncio',
+		'bz2',
+		'socket',
+		'ssl',
+		'lzma',
+	],
 	win_no_prefer_redirects=False,
 	win_private_assemblies=False,
 	noarchive=False
