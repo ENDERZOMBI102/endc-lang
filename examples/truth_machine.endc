@@ -1,0 +1,12 @@
+|* truth machine example 13/1/2022 by ENDERZOMBI102
+*|
+DCLAR FUNC main{StRiNg() argv______} [
+     DCLAR CONSTANT valu______ = STDIN,givm{}/
+     CHCK IF { valu______ IS *0* } DO [
+		CALL printto{ STDOUT. *0* }
+     ] LS [
+		UNTIL { 0 } [
+			CALL printto{ STDOUT. *1* }
+		]
+     ]
+]
