@@ -1,4 +1,4 @@
-DCLAR FUNC main{StRiNg() argv______} [
+DCLAR SUBROUTIN main{StRiNg() argv______} <- NoThInG [
      DCLAR CONSTANT InTgR ladingDot = ,9/
      CALL printto{ STDOUT. ladingDot }/
 ]

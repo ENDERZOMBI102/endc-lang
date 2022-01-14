@@ -2,7 +2,7 @@
 *|
 OWN grt. pat FROM importable/
 
-DCLAR FUNC main{StRiNg() argv______} <- InTgR [
+DCLAR SUBROUTIN main{StRiNg() argv______} <- InTgR [
      DCLAR CONSTANT StRiNg() nam_______ = *Igor*/
      CALL printto{ STDOUT. CALL grt{nam_______} }/
      CALL printto{ STDOUT. CALL pat{nam_______} }/

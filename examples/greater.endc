@@ -1,11 +1,11 @@
-DCLAR FUNC main{StRiNg() argv______} [
+DCLAR SUBROUTIN main{StRiNg() argv______} <- InTgR [
      |* aka 23 >= 22 -> false
      *|
      CHCK IF { 23 =< 22 } DO [
-          DCLAR CONSTANT falsytxt__ = *a greater/equal to b*/
+          DCLAR CONSTANT StRiNg falsytxt__ = *a greater/equal to b*/
           CALL printto{ STDOUT. falsytxt__ }/
      ] LS DO [
-          DCLAR CONSTANT truthytxt__ = *a smoller than b*/
+          DCLAR CONSTANT StRiNg truthytxt__ = *a smoller than b*/
           CALL printto{ STDOUT. truthytxt__ }/
      ]
      GIV BACK 0/

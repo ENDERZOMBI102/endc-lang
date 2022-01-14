@@ -1,6 +1,6 @@
 |* math examples 18/10/2021
 *|
-DCLAR FUNC main{StRiNg() argv______} [
+DCLAR SUBROUTIN main{StRiNg() argv______} <- InTgR[
      DCLAR CONSTANT StRiNg ADDPRINTTXT = *9 - 3 = */
      DCLAR CONSTANT StRiNg SUBTRACTPRINTTXT = *\n9 + 3 = */
      DCLAR CONSTANT StRiNg DIVIDPRINTTXT = *\n9 ; 3 = */
