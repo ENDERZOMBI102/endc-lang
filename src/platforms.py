@@ -8,6 +8,7 @@ class Platform(Enum):
 	LLVM = 'llvm'
 	WASM = 'wasm'
 	NEKO = 'neko'
+	HASHLINK = 'hashlink'
 	JVM = 'jvm'
 	PYTHON = 'py'
 	JAVASCRIPT = 'js'
