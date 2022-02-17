@@ -1,5 +1,5 @@
 """
-Parsers a stream/list of tokens into an abstract binary tree, while doing a intermediate syntax check
+Parsers a stream/list of tokens into an abstract binary tree, while doing an intermediate syntax check
 """
 
 from typing import Final, Union, Optional
@@ -35,7 +35,7 @@ class Parser:
 	def parse( self ) -> Optional[Expr]:
 		try:
 			return self.expression()
-		except ParseError as ignored:
+		except ParseError:
 			return None
 
 	def expression( self ) -> Expr:
