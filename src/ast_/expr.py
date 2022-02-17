@@ -34,7 +34,7 @@ class Visitor(Generic[R], metaclass=ABCMeta):
 
 class Expr(metaclass=ABCMeta):
 	@abstractmethod
-	def accept(self, visitor: Visitor[R]) -> R:
+	def accept( self, visitor: Visitor[R] ) -> R:
 		pass
 
 
