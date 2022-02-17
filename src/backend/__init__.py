@@ -64,6 +64,12 @@ BACKENDS: dict[ Platform, BackendInfo ] = {
 		help='Compiles to the Neko VM bytecode',
 		available=False
 	),
+	Platform.HASHLINK: BackendInfo(
+		name='HashLink',
+		pkg='backend.hashlink',
+		help='Compiles to the HashLink bytecode',
+		available=False
+	),
 	Platform.JAVASCRIPT: BackendInfo(
 		name='JavaScript',
 		pkg='backend.js',
