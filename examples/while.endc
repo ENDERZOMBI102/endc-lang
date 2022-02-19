@@ -1,0 +1,14 @@
+|* while and do-while example 19/2/2022 by ENDERZOMBI102
+*|
+DCLAR SUBROUTIN main{StRiNg() argv______} [
+     |* while
+     *|
+     CHCK UNTIL { !NO } DO [
+
+     ]/
+     |* do while
+     *|
+     DO [
+
+     ] UNTIL WHN { !NO }/
+]
