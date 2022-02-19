@@ -12,46 +12,59 @@ printToStderrOnFatalError: bool = False
 
 
 class Keyword(Enum):
-	# KEYWORDS
-	DCLAR = auto()  # DCLAR
-	CALL = auto()  # CALL
-	FUNC = auto()  # FUNC
-	CHCK = auto()  # CHCK
-	IF = auto()  # IF
-	Doc = auto()  # DO
-	LS = auto()  # LS
-	IS = auto()  # IS
-	CONSTANT = auto()  # CONSTANT
-	VARIABL = auto()  # VARIABL
-	OWN = auto()  # OWN
-	FROM = auto()  # FROM
-	XPORT = auto()  # XPORT
-	GIV = auto()  # GIV
-	BACK = auto()  # BACK
-	TMPLAT = auto()  # TMPLAT
-	WHIL = auto()  # WHIL
-	BUILD = auto()  # BUILD
-	# COMMENTS
-	CommentOpen = auto()  # |*
-	CommentText = auto()  # |* THIS TEXT *|
-	CommentClose = auto()  # *|
-	# PARENTHESES
-	BracketOpen = auto()  # [
-	BracketClose = auto()  # ]
-	CurlyOpen = auto()  # {
-	CurlyClose = auto()  # }
-	ParenthesesOpen = auto()  # (
-	ParenthesesClose = auto()  # )
-	# SYMBOLS
-	Slash = auto()  # /
-	Arrow = auto()  # <-
-	Dot = auto()  # .
-	Comma = auto()  # ,
-	Equal = auto()  # =
-	Newline = auto()  # \n
-	# BUILTIN VALUES
-	NO = 'NO'
+	# OP KEYWORDS
+	IS = 'IS'
+	OR = 'OTHRWIS'
+	AND = 'FUTHRMOR'
+	# CONTROL FLOW KEYWORDS
+	IF = 'IF'
+	ELSE = 'LS'
+	DO = 'DO'
+	CHECK = 'CHCK'
+	UNTIL = 'UNTIL'
+	WHEN = 'WHN'
+	FINISHED = 'FINISHD'
+	# NORMAL KEYWORDS
+	DECLARE = 'DCLAR'
+	CONSTANT = 'CONSTANT'
+	VARIABLE = 'VARIABL'
+	GIVE = 'GIV'
+	BACK = 'BACK'
+	SUBROUTINE = 'SUBROUTIN'
+	CALL = 'CALL'
+	EXPORT = 'XPORT'
+	TEMPLATE = 'TMPLAT'
+	BEHAVIOR = 'BHAVIOR'
+	BUILD = 'BUILD'
+	OWN = 'OWN'
+	FROM = 'FROM'
+	INITIALIZER = 'INITIALIZR'
+	DEINITIALIZER = 'DINITIALIZR'
+	# CONSTANTS
+	ME = 'M'
+	FALSE = 'NO'
 	NOTHING = 'NOTHING'
+
+
+class Symbol(Enum):
+	LPAREN = '('
+	RPAREN = ')'
+	COLON = ':'
+	COMMA = ','
+	LBRACK = '['
+	RBRACK = ']'
+	LBRACE = '{'
+	RBRACE = '}'
+	EQUAL = '='
+	SUB = '+'
+	BANG = '!'
+	DIV = ';'
+	ADD = '-'
+	MODULO = '\\'
+	GT = '<'
+	GE = '=<'
+	DOT = '.'
+	ARROW = '<-'
 
 
 class UnaryType(Enum):
@@ -70,6 +83,7 @@ class TokenType(Enum):
 	FLOAT = auto()
 	STR = auto()
 	KEYWORD = auto()
+	SYMBOL = auto()
 	UNARY = auto()
 	EOF = auto()
 
@@ -79,7 +93,7 @@ class Token:
 	typ: TokenType
 	text: str
 	loc: Loc
-	value: Union[float, str, Keyword, UnaryType]
+	value: Union[ float, str, Keyword, Symbol, UnaryType ]
 
 
 @dataclass
@@ -164,12 +178,12 @@ def parse(codeString: str, file: str) -> list[Token]:
 
 		if getIsWord('DCLAR'):
 			code += [ Token( TokenType.KEYWORD, '', getLocation('DCLAR'), Keyword.DCLAR ) ]
-		elif getIsWord('FUNC'):
+		elif getIsWord('SUBROUTIN'):
 			if len(code) == 0:
-				fatal('Expected DCLAR FUNC, found FUNC at line {line}', lineN, 0 )
+				fatal('Expected DCLAR SUBROUTIN, found SUBROUTIN at line {line}', lineN, 0 )
 			elif code[-1].typ != TokenType.KEYWORD and code[-1].value != Keyword.DCLAR and line[char + 2] != '[':
-				fatal('Expected DCLAR FUNC, found FUNC at line {line}', lineN, char )
-			code += [ Token( TokenType.KEYWORD, '', getLocation('FUNC'), Keyword.FUNC ) ]
+				fatal('Expected DCLAR SUBROUTIN, found SUBROUTIN at line {line}', lineN, char )
+			code += [ Token( TokenType.KEYWORD, '', getLocation('SUBROUTIN'), Keyword.SUBROUTIN ) ]
 		elif getIsWord('CONSTANT'):
 			assertIsKw( Keyword.DCLAR, Keyword.CONSTANT, getLocation('CONSTANT') )
 			code += [ Token( TokenType.KEYWORD, '', getLocation('CONSTANT'), Keyword.CONSTANT ) ]
@@ -223,7 +237,7 @@ def parse(codeString: str, file: str) -> list[Token]:
 			):
 				if (
 					len( code ) == 0 or (
-						code[-1].value != Keyword.FUNC and
+						code[-1].value != Keyword.SUBROUTIN and
 						code[-1].value != Keyword.BracketClose and
 						code[-1].value != Keyword.IF and
 						code[-1].value != Keyword.CALL and
@@ -231,7 +245,7 @@ def parse(codeString: str, file: str) -> list[Token]:
 					)
 				):
 					fatal(
-						'at {line}:{char} opening brace can only go after a name, a FUNC, a IF, a ] keyword or before an expression',
+						'at {line}:{char} opening brace can only go after a name, a SUBROUTIN, a IF, a ] keyword or before an expression',
 						lineN,
 						char
 					)
@@ -248,11 +262,11 @@ def parse(codeString: str, file: str) -> list[Token]:
 						code[-2].value != Keyword.BUILD and
 						code[-2].value != Keyword.Comma and
 						code[-2].value != Keyword.IF and
-						code[-2].value != Keyword.FUNC
+						code[-2].value != Keyword.SUBROUTIN
 					)
 			):
 				fatal(
-					'missing FUNC or CALL keyword at {line}:{char}',
+					'missing SUBROUTIN or CALL keyword at {line}:{char}',
 					code[-1].loc[1],
 					code[-1].loc[2]
 				)
