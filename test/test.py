@@ -16,12 +16,9 @@ class ExpressionTest(TestCase):
 		# one line comments
 		with self.assertRaises( tokenizer.TokenizerError ):
 			tokenizer.Tokenizer( '|* comment test *|', '<test>' ).tokenize().getTokens()
-		# opening curly brace without word/func/expression
-		with self.assertRaises( tokenizer.TokenizerError ):
-			tokenizer.Tokenizer( '{', '<test>' ).tokenize().getTokens()
 		# FUNC without DCLAR or CALL
 		with self.assertRaises( tokenizer.TokenizerError ):
-			tokenizer.Tokenizer( 'FUNC', '<test>' ).tokenize().getTokens()
+			tokenizer.Tokenizer( 'SUBROUTIN', '<test>' ).tokenize().getTokens()
 		# unfinished string
 		with self.assertRaises( tokenizer.TokenizerError ):
 			tokenizer.Tokenizer( '*/\n', '<test>' ).tokenize().getTokens()

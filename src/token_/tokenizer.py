@@ -6,9 +6,16 @@ from __future__ import annotations
 from os import PathLike
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional
+from typing import Optional, Final
 
 from token_ import Token, Symbol, TokenType, Keyword, Loc, UnaryType
+
+
+__all__ = [
+	'Tokenizer',
+	'TokenizerError'
+]
+_HARDCORE: Final[ bool ] = False
 
 
 @dataclass
@@ -289,12 +296,13 @@ class Tokenizer:
 					)
 				self.lineN += 1
 				self.char = 0
-				spaceCount: int = 0
-				while self._peek( 1 + spaceCount ) == ' ':
-					spaceCount += 1
-				if spaceCount != 0 and spaceCount % 5 != 0:
-					self._fatal( f'Indentation should be a multiple of 5 ( found {spaceCount} spaces )' )
-				del spaceCount
+				if _HARDCORE:
+					spaceCount: int = 0
+					while self._peek( 1 + spaceCount ) == ' ':
+						spaceCount += 1
+					if spaceCount != 0 and spaceCount % 5 != 0:
+						self._fatal( f'Indentation should be a multiple of 5 ( found {spaceCount} spaces )' )
+					del spaceCount
 			elif self._getIsWord( '\0' ) or ( self.char == len( self.line ) and self.lineN == len( self.lines ) - 1 ):
 				break
 			elif self._peek( 0 ) in ',1234567890' and self._peek() in '0123456789':
