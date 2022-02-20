@@ -80,8 +80,8 @@ class Symbol(Enum):
 	DIV = ';'
 	ADD = '-'
 	MODULO = '\\'
-	GT = '<'
-	GE = '=<'
+	GREATER = '<'
+	GREATER_EQUAL = '=<'
 	DOT = '.'
 	ARROW = '<-'
 

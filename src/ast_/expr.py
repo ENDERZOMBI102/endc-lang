@@ -6,7 +6,7 @@ from abc import ABCMeta, abstractmethod
 from typing import TypeVar, Generic
 from dataclasses import dataclass
 
-from tokenizer import Token
+from token_ import Token
 
 
 R = TypeVar("R")

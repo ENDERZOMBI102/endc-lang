@@ -6,8 +6,7 @@ from typing import Final, Union, Optional
 
 from ast_ import ParseError
 from ast_.expr import Expr, Binary, Unary, Literal, Grouping
-from tokenizer import Token, Keyword, TokenType, UnaryType
-
+from token_ import Token, Keyword, TokenType, UnaryType, Loc, Symbol
 
 hadError: bool = False
 
@@ -30,7 +29,7 @@ class Parser:
 	current: int = 0
 
 	def __init__(self, tokens: list[Token]) -> None:
-		self.tokens = tokens + [ Token(TokenType.EOF, '', ('', 0, 0), '') ]
+		self.tokens = tokens + [ Token(TokenType.EOF, '', Loc('', 0, 0) ) ]
 
 	def parse( self ) -> Optional[Expr]:
 		try:
@@ -89,7 +88,7 @@ class Parser:
 		return self.primary()
 
 	def primary( self ) -> Expr:
-		if self.match(Keyword.NO):
+		if self.match(Keyword.FALSE):
 			return Literal(False)
 		if self.match(Keyword.NOTHING):
 			return Literal(None)
@@ -97,14 +96,14 @@ class Parser:
 		if self.matchType(TokenType.FLOAT, TokenType.STR):
 			return Literal(self.previous().value)
 
-		if self.match(Keyword.CurlyOpen):
+		if self.match(Symbol.LBRACE):
 			expr: Expr = self.expression()
-			self.consume(Keyword.CurlyClose, 'Expect } after expression.')
+			self.consume(Symbol.RBRACE, 'Expect } after expression.')
 			return Grouping(expr)
 
 		raise self.error( self.peek(), 'Expect expression.' )
 
-	def consume( self, typ: Union[TokenType, Keyword, UnaryType], message: str ) -> Token:
+	def consume( self, typ: TokenType | Keyword | UnaryType | Symbol, message: str ) -> Token:
 		if isinstance(typ, TokenType):
 			if self.checkType(typ):
 				return self.advance()
@@ -122,22 +121,22 @@ class Parser:
 		self.advance()
 
 		while not self.isAtEnd():
-			if self.previous().value == Keyword.Slash:
+			if self.previous().value == Symbol.SLASH:
 				return
 
 			if self.peek().value in (
-					Keyword.DCLAR,
-					Keyword.XPORT,
-					Keyword.CHCK,
+					Keyword.DECLARE,
+					Keyword.EXPORT,
+					Keyword.CHECK,
 					Keyword.CALL,
-					Keyword.GIV,
-					Keyword.WHIL,
+					Keyword.GIVE,
+					Keyword.UNTIL,
 			):
 				return
 
 			self.advance()
 
-	def match( self, *types: Union[Keyword, UnaryType] ) -> bool:
+	def match( self, *types: Keyword | UnaryType | Symbol ) -> bool:
 		for typ in types:
 			if self.check(typ):
 				self.advance()
