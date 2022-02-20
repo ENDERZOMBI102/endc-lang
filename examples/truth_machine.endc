@@ -1,12 +1,12 @@
 |* truth machine example 13/1/2022 by ENDERZOMBI102
 *|
 DCLAR SUBROUTIN main{StRiNg() argv______} <- InTgR [
-     DCLAR CONSTANT StRiNg valu______ = CALL STDIN,givm{}/
-     CHCK IF { valu______ IS *0* } DO [
-		CALL printto{ STDOUT. *0* }/
-     ] LS DO [
-		CHCK UNTIL { NO } DO [
-			CALL printto{ STDOUT. *1* }/
-		]
-     ]
+      DCLAR CONSTANT StRiNg valu______ = CALL STDIN,givm{}/
+      CHCK IF { valu______ IS *0* } DO [
+           CALL printto{ STDOUT. *0* }/
+      ] LS DO [
+           CHCK UNTIL { NO } DO [
+                CALL printto{ STDOUT. *1* }/
+           ]
+      ]
 ]

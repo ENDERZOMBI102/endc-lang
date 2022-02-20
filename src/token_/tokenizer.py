@@ -118,7 +118,7 @@ class Tokenizer:
 				if self.code[-1].typ != TokenType.NAME:
 					self._fatal( f'Missing NAME before IS keyword at {loc}' )
 				self.code += [ Token( TokenType.KEYWORD, Keyword.IS, loc ) ]
-			# symbols
+			# parens
 			elif self._getIsWord(Symbol.LBRACK):
 				self.code += [ Token( TokenType.SYMBOL, Symbol.LBRACK, Loc.create( self, Symbol.LBRACK ) ) ]
 			elif self._getIsWord(Symbol.RBRACK):
@@ -144,7 +144,7 @@ class Tokenizer:
 				self.code += [ Token( TokenType.KEYWORD, Keyword.ELSE, loc ) ]
 			elif self._getIsWord( Keyword.SUBROUTINE ):
 				loc = Loc.create( self, Keyword.SUBROUTINE )
-				if self.code[-1].value not in ( Keyword.DECLARE, Keyword.CALL ):
+				if len( self.code ) == 0 or self.code[-1].value not in ( Keyword.DECLARE, Keyword.CALL ):
 					self._fatal( f'Missing DECLARE or CALL keyword before SUBROUTINE keyword at {loc}' )
 				self.code += [ Token( TokenType.KEYWORD, Keyword.SUBROUTINE, loc ) ]
 			elif self._getIsWord( Keyword.WHEN ):
@@ -275,6 +275,8 @@ class Tokenizer:
 			# special stuff
 			elif self._getIsWord( ' ' ):
 				pass
+			elif self._getIsWord( '\t' ):
+				self._fatal( f'Found invalid character at {Loc.create(self, " ")} ( TAB cannot be used )' )
 			elif self._getIsWord( '\n' ) or self.char == len( self.line ) - 1:
 				if (
 					self.code[ -1 ].typ not in ( TokenType.KEYWORD, TokenType.SYMBOL ) or
@@ -287,6 +289,12 @@ class Tokenizer:
 					)
 				self.lineN += 1
 				self.char = 0
+				spaceCount: int = 0
+				while self._peek( 1 + spaceCount ) == ' ':
+					spaceCount += 1
+				if spaceCount != 0 and spaceCount % 5 != 0:
+					self._fatal( f'Indentation should be a multiple of 5 ( found {spaceCount} spaces )' )
+				del spaceCount
 			elif self._getIsWord( '\0' ) or ( self.char == len( self.line ) and self.lineN == len( self.lines ) - 1 ):
 				break
 			elif self._peek( 0 ) in ',1234567890' and self._peek() in '0123456789':
