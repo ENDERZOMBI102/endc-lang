@@ -5,108 +5,10 @@ from __future__ import annotations
 
 from os import PathLike
 from dataclasses import dataclass
-from enum import auto, Enum
-from typing import Union, Optional, NamedTuple
+from enum import Enum
+from typing import Optional
 
-
-class Loc( NamedTuple ):
-	file: str
-	line: int
-	char: int
-
-	@classmethod
-	def create( cls, tokenizer: Tokenizer, kw: str | Keyword | Symbol ) -> Loc:
-		return cls(
-			tokenizer.file,
-			tokenizer.lineN,
-			tokenizer.char - ( len( kw.value if isinstance( kw, Enum ) else kw ) - 1 )
-		)
-
-
-class Keyword(Enum):
-	# OP KEYWORDS
-	IS = 'IS'
-	OR = 'OTHRWIS'
-	AND = 'FUTHRMOR'
-	# CONTROL FLOW KEYWORDS
-	IF = 'IF'
-	ELSE = 'LS'
-	DO = 'DO'
-	CHECK = 'CHCK'
-	UNTIL = 'UNTIL'
-	WHEN = 'WHN'
-	FINISHED = 'FINISHD'
-	# NORMAL KEYWORDS
-	DECLARE = 'DCLAR'
-	CONSTANT = 'CONSTANT'
-	VARIABLE = 'VARIABL'
-	GIVE = 'GIV'
-	BACK = 'BACK'
-	SUBROUTINE = 'SUBROUTIN'
-	CALL = 'CALL'
-	EXPORT = 'XPORT'
-	TEMPLATE = 'TMPLAT'
-	BEHAVIOR = 'BHAVIOR'
-	BUILD = 'BUILD'
-	OWN = 'OWN'
-	FROM = 'FROM'
-	INITIALIZER = 'INITIALIZR'
-	DEINITIALIZER = 'DINITIALIZR'
-	# CONSTANTS
-	ME = 'M'
-	FALSE = 'NO'
-	NOTHING = 'NOTHING'
-
-
-class Symbol(Enum):
-	LPAREN = '('
-	RPAREN = ')'
-	LBRACK = '['
-	RBRACK = ']'
-	LBRACE = '{'
-	RBRACE = '}'
-	SLASH = '/'
-	COLON = ':'
-	COMMA = ','
-	EQUAL = '='
-	SUB = '+'
-	BANG = '!'
-	DIV = ';'
-	ADD = '-'
-	MODULO = '\\'
-	GT = '<'
-	GE = '=<'
-	DOT = '.'
-	ARROW = '<-'
-
-
-class UnaryType(Enum):
-	SUBTRACT = auto()		# +
-	ADD = auto()  			# -
-	DIVIDE = auto()			# ;
-	MODULO = auto()			# \
-	BANG = auto()			# !
-	GREATER = auto()		# <
-	GREATER_EQUAL = auto()  # =<
-	BANG_IS = auto()		# !IS
-
-
-class TokenType(Enum):
-	NAME = auto()
-	FLOAT = auto()
-	STR = auto()
-	COMMENT = auto()
-	KEYWORD = auto()
-	SYMBOL = auto()
-	UNARY = auto()
-	EOF = auto()
-
-
-@dataclass
-class Token:
-	typ: TokenType
-	value: Union[ float, str, Keyword, Symbol, UnaryType ]
-	loc: Loc
+from token_ import Token, Symbol, TokenType, Keyword, Loc, UnaryType
 
 
 @dataclass
@@ -150,11 +52,23 @@ class Tokenizer:
 				self.code += [ Token( TokenType.KEYWORD, Keyword.CHECK, Loc.create( self, Keyword.CHECK ) ) ]
 			elif self._getIsWord( Keyword.OWN ):
 				self.code += [ Token( TokenType.KEYWORD, Keyword.OWN, Loc.create( self, Keyword.OWN ) ) ]
+			elif self._getIsWord( Keyword.CALL ):
+				self.code += [ Token( TokenType.KEYWORD, Keyword.CALL, Loc.create( self, Keyword.CALL ) ) ]
+			elif self._getIsWord( Symbol.DOT ):
+				self.code += [ Token( TokenType.SYMBOL, Symbol.DOT, Loc.create( self, Symbol.DOT ) ) ]
+			elif self._getIsWord( Symbol.ADD ):
+				self.code += [ Token( TokenType.UNARY, UnaryType.ADD, Loc.create( self, Symbol.ADD ) ) ]
+			elif self._getIsWord( Symbol.SUB ):
+				self.code += [ Token( TokenType.UNARY, UnaryType.SUBTRACT, Loc.create( self, Symbol.SUB ) ) ]
+			elif self._getIsWord( Symbol.DIV ):
+				self.code += [ Token( TokenType.UNARY, UnaryType.DIVIDE, Loc.create( self, Symbol.DIV ) ) ]
+			elif self._getIsWord( Symbol.MODULO ):
+				self.code += [ Token( TokenType.UNARY, UnaryType.MODULO, Loc.create( self, Symbol.MODULO ) ) ]
 			# keywords with prefix needed
 			elif self._getIsWord( Keyword.CONSTANT ):
 				loc = Loc.create( self, Keyword.VARIABLE )
 				self._assertIsKw( Keyword.DECLARE, Keyword.CONSTANT, loc )
-				self.code += [ Token( TokenType.KEYWORD, Keyword.DECLARE, loc ) ]
+				self.code += [ Token( TokenType.KEYWORD, Keyword.CONSTANT, loc ) ]
 			elif self._getIsWord( Keyword.VARIABLE ):
 				loc = Loc.create( self, Keyword.VARIABLE )
 				self._assertIsKw( Keyword.DECLARE, Keyword.VARIABLE, loc )
@@ -167,10 +81,6 @@ class Tokenizer:
 				loc = Loc.create( self, Keyword.TEMPLATE )
 				self._assertIsKw( Keyword.DECLARE, Keyword.TEMPLATE, loc )
 				self.code += [ Token( TokenType.KEYWORD, Keyword.TEMPLATE, loc ) ]
-			elif self._getIsWord( Keyword.SUBROUTINE ):
-				loc = Loc.create( self, Keyword.SUBROUTINE )
-				self._assertIsKw( Keyword.DECLARE, Keyword.SUBROUTINE, loc )
-				self.code += [ Token( TokenType.KEYWORD, Keyword.SUBROUTINE, loc ) ]
 			elif self._getIsWord( Keyword.BUILD ):
 				loc = Loc.create( self, Keyword.BUILD )
 				self._assertIsKw( Keyword.CALL, Keyword.BUILD, loc )
@@ -187,27 +97,74 @@ class Tokenizer:
 				loc = Loc.create( self, Keyword.IF )
 				self._assertIsKw( Keyword.CHECK, Keyword.IF, loc )
 				self.code += [ Token( TokenType.KEYWORD, Keyword.IF, loc ) ]
-			elif self._getIsWord( Keyword.UNTIL ):
-				loc = Loc.create( self, Keyword.UNTIL )
-				self._assertIsKw( Keyword.CHECK, Keyword.UNTIL, loc )
-				self.code += [ Token( TokenType.KEYWORD, Keyword.UNTIL, loc ) ]
+			elif self._getIsWord( Symbol.ARROW ):
+				loc = Loc.create( self, Symbol.ARROW )
+				self._assertIsKw( Symbol.RBRACE, Symbol.ARROW, loc )
+				self.code += [ Token( TokenType.SYMBOL, Symbol.ARROW, loc ) ]
+			elif self._getIsWord( Symbol.EQUAL ):
+				loc = Loc.create( self, Symbol.EQUAL )
+				if self.code[-1].typ != TokenType.NAME:
+					self._fatal( f'Missing NAME before = symbol at {loc}' )
+				self.code += [ Token( TokenType.SYMBOL, Symbol.EQUAL, loc ) ]
+			elif self._getIsWord( Keyword.IS ):
+				loc = Loc.create( self, Keyword.IS )
+				if self.code[-1].typ != TokenType.NAME:
+					self._fatal( f'Missing NAME before IS keyword at {loc}' )
+				self.code += [ Token( TokenType.KEYWORD, Keyword.IS, loc ) ]
 			# symbols
 			elif self._getIsWord(Symbol.LBRACK):
 				self.code += [ Token( TokenType.SYMBOL, Symbol.LBRACK, Loc.create( self, Symbol.LBRACK ) ) ]
 			elif self._getIsWord(Symbol.RBRACK):
-				self.code += [ Token( TokenType.SYMBOL, Symbol.LBRACK, Loc.create( self, Symbol.RBRACK ) ) ]
+				self.code += [ Token( TokenType.SYMBOL, Symbol.RBRACK, Loc.create( self, Symbol.RBRACK ) ) ]
 			elif self._getIsWord(Symbol.LBRACE):
-				self.code += [ Token( TokenType.SYMBOL, Symbol.LBRACK, Loc.create( self, Symbol.LBRACE ) ) ]
+				self.code += [ Token( TokenType.SYMBOL, Symbol.LBRACE, Loc.create( self, Symbol.LBRACE ) ) ]
 			elif self._getIsWord(Symbol.RBRACE):
-				self.code += [ Token( TokenType.SYMBOL, Symbol.LBRACK, Loc.create( self, Symbol.RBRACE ) ) ]
+				self.code += [ Token( TokenType.SYMBOL, Symbol.RBRACE, Loc.create( self, Symbol.RBRACE ) ) ]
 			elif self._getIsWord(Symbol.LPAREN):
-				self.code += [ Token( TokenType.SYMBOL, Symbol.LBRACK, Loc.create( self, Symbol.LPAREN ) ) ]
+				self.code += [ Token( TokenType.SYMBOL, Symbol.LPAREN, Loc.create( self, Symbol.LPAREN ) ) ]
 			elif self._getIsWord(Symbol.RPAREN):
-				self.code += [ Token( TokenType.SYMBOL, Symbol.LBRACK, Loc.create( self, Symbol.RPAREN ) ) ]
+				self.code += [ Token( TokenType.SYMBOL, Symbol.RPAREN, Loc.create( self, Symbol.RPAREN ) ) ]
 			elif self._getIsWord(Symbol.SLASH):
 				self.code += [ Token( TokenType.SYMBOL, Symbol.SLASH, Loc.create( self, Symbol.SLASH ) ) ]
 
 			# special keywords
+			elif self._getIsWord( Keyword.ELSE ):
+				loc = Loc.create( self, Keyword.ELSE )
+				if self.code[-1].value != Symbol.RBRACK:
+					self._fatal( f'Missing RBRACK symbol before LS keyword at {loc}' )
+				if self._peekWord() != Keyword.DO.value:
+					self._fatal( f'Missing DO symbol after LS keyword at {loc}' )
+				self.code += [ Token( TokenType.KEYWORD, Keyword.ELSE, loc ) ]
+			elif self._getIsWord( Keyword.SUBROUTINE ):
+				loc = Loc.create( self, Keyword.SUBROUTINE )
+				if self.code[-1].value not in ( Keyword.DECLARE, Keyword.CALL ):
+					self._fatal( f'Missing DECLARE or CALL keyword before SUBROUTINE keyword at {loc}' )
+				self.code += [ Token( TokenType.KEYWORD, Keyword.SUBROUTINE, loc ) ]
+			elif self._getIsWord( Keyword.WHEN ):
+				loc = Loc.create( self, Keyword.WHEN )
+				if self.code[-1].value != Keyword.UNTIL:
+					self._fatal( f'Missing UNTIL keyword before WHEN keyword at {loc}' )
+				if self._peekIgnoreSpaces() != Symbol.LBRACE.value:
+					self._fatal( f'Missing LBRACE symbol after WHEN keyword at {loc}' )
+				self.code += [ Token( TokenType.KEYWORD, Keyword.WHEN, loc ) ]
+			elif self._getIsWord( Keyword.UNTIL ):
+				loc = Loc.create( self, Keyword.UNTIL )
+				# ] UNTIL WHN {  }
+				if self.code[-1].value == Symbol.RBRACK:
+					if self._peekWord() != 'WHN':
+						self._fatal( f'Missing WHN keyword after UNTIL keyword at {loc}' )
+				# CHCK UNTIL {} DO [
+				elif self.code[-1].value == Keyword.CHECK:
+					if self._peekIgnoreSpaces() != Symbol.LBRACE.value:
+						self._fatal( f'Missing LBRACE symbol after UNTIL keyword at {loc}' )
+				else:
+					self._fatal( f'Missing RBRACK symbol or CHECK keyword before UNTIL keyword at {loc}' )
+				self.code += [ Token( TokenType.KEYWORD, Keyword.UNTIL, loc ) ]
+			elif self._getIsWord( Keyword.DO ):
+				loc = Loc.create( self, Keyword.DO )
+				if self._peekIgnoreSpaces() != Symbol.LBRACK.value:
+					self._fatal( f'Missing LBRACK symbol after DO keyword at {loc}' )
+				self.code += [ Token( TokenType.KEYWORD, Keyword.DO, loc ) ]
 			elif self._peek(0) == '!':
 				self._getChar()
 				if self._getIsWord('IS'):
@@ -216,28 +173,45 @@ class Tokenizer:
 					self.code += [ Token( TokenType.UNARY, UnaryType.BANG, Loc.create( self, '!' ) ) ]
 			elif self._getIsWord( Keyword.FROM ):
 				loc = Loc.create( self, Keyword.FROM )
-				hasNames = hasOwn = False
 				offset = -1
-				while not hasOwn:
-					if self.code[offset].value == Keyword.OWN:
-						hasOwn = True
-					elif self.code[offset].typ == TokenType.NAME:
-						hasNames = True
-					else:
-						self._fatal(
-							f'Invalid token found in import statement, expected NAME or OWN found {self.code[offset].typ} at {self.code[offset].loc}',
-							loc.line,
-							loc.char
-						)
+				OWN_OR_DOT, NAME = 0, 1
+				expect: int = NAME
+				# OWN name. name FROM something/
+				while True:
+					match self.code[offset]:
+						case Token( value=Keyword.OWN ) as found:
+							if expect == NAME:
+								self._fatal(
+									f'Expected NAMEs between OWN and FROM found nothing',
+									found.loc.line,
+									found.loc.char
+								)
+							break
+						case Token( typ=TokenType.NAME ) as found:
+							if expect == OWN_OR_DOT:
+								self._fatal(
+									f'Expected DOT symbol or OWN keyword before NAME found NAME',
+									found.loc.line,
+									found.loc.char
+								)
+							expect = OWN_OR_DOT
+						case Token( value=Symbol.DOT ) as found:
+							if expect == NAME:
+								self._fatal(
+									f'Expected NAMEs between OWN and FROM found nothing',
+									found.loc.line,
+									found.loc.char
+								)
+							expect = NAME
+						case found:
+							self._fatal(
+								f'Invalid token found in import statement, expected NAME or OWN found {self.code[offset].typ} at {self.code[offset].loc}',
+								found.loc.line,
+								found.loc.char
+							)
 					offset -= 1
-				if not hasNames:
-					self._fatal(
-						f'Expected NAMEs between OWN and FROM found nothing',
-						loc.line,
-						loc.char
-					)
-				self._assertIsKw( Keyword.DECLARE, Keyword.FROM, loc )
 				self.code += [ Token( TokenType.KEYWORD, Keyword.FROM, loc ) ]
+				del offset, OWN_OR_DOT, NAME, expect
 			elif self._getIsWord( '|*' ):
 				startLine: int = self.lineN
 				found = False
@@ -267,18 +241,30 @@ class Tokenizer:
 					)
 				self.lineN += 1
 				self.char = 0
+				del startLine, found, chIndex, chLine
 			elif self._getIsWord( '*' ):
 				string: str = ''
-				while self._peek( 0 ) != '*':
+				while True:
+					if self._peek( 0 ) == '*' and string[-1] != '\\':
+						break
+					if self._peek( 0 ) == '*':
+						string = string[: -1 ] + self._getChar()
 					if self._peek( 0 ) == '\n':
-						self._fatal(
-							'Reached end of line ({line}) without closing string "*"',
-							self.lineN,
-							self.char
-						)
+						self._fatal( 'Reached end of line ({line}) without closing string character "*"' )
 					string += self._getChar()
+				if 'e' in string and self.code[ -4 ].value != Keyword.CONSTANT:
+					self._fatal(
+						'Found "e" character in non-constant string! THIS IS THE WORST POSSIBLE THING EVER!',
+						col=( self.char - len(string) ) + string.find( 'e' ) + 1
+					)
+				if 'E' in string and self.code[ -4 ].value != Keyword.CONSTANT:
+					self._fatal(
+						'Found "E" character in non-constant string! THIS IS THE WORST POSSIBLE THING EVER!',
+						col=( self.char - len(string) ) + string.find( 'E' ) + 1
+					)
 				self.char += 1
 				self.code += [ Token( TokenType.STR, string, Loc.create( self, string ) ) ]
+				del string
 			# special stuff
 			elif self._getIsWord( ' ' ):
 				pass
@@ -296,7 +282,7 @@ class Tokenizer:
 				self.char = 0
 			elif self._getIsWord( '\0' ) or ( self.char == len( self.line ) and self.lineN == len( self.lines ) - 1 ):
 				break
-			elif self._peek( 0 ) in ',1234567890':
+			elif self._peek( 0 ) in ',1234567890' and self._peek() in '0123456789':
 				num = ''
 				while self._peek( 0 ) in ',1234567890':
 					if ( numChar := self._getChar() ) != '\0':
@@ -309,6 +295,11 @@ class Tokenizer:
 						)
 				fnum = float( num.replace( ',', '.' ) )
 				self.code += [ Token( TokenType.FLOAT, fnum, Loc.create( self, str( fnum ) ) ) ]
+				del fnum, num, numChar
+			elif self._getIsWord( ',' ):
+				self.code += [
+					Token( TokenType.SYMBOL, Symbol.COMMA, Loc.create( self, Symbol.COMMA ) )
+				]
 			else:
 				name: str = ''
 				while self._peek( 0 ) not in ( ' ', '\n', '{', '(', '[', ']', ')', '}', '.', '\0', '/' ):
@@ -320,6 +311,7 @@ class Tokenizer:
 						self.char - ( len( name ) - 1 ) + name.lower().index( 'e' )
 					)
 				self.code += [ Token( TokenType.NAME, name, Loc.create( self, name ) ) ]
+				del name
 
 		return self
 
@@ -345,10 +337,27 @@ class Tokenizer:
 		return self.line[ self.char + offset ] if self.char + offset < len( self.line ) else '\0'
 
 	def _peekIgnoreSpaces( self, offset: int = 1 ) -> str:
-		""" Returns a word """
+		""" Returns a char, ignoring spaces """
 		while self._peek( offset ) == ' ':
 			offset += 1
 		return self.line[ self.char + offset ] if self.char + offset < len( self.line ) else '\0'
+
+	def _peekWord( self, offset: int = 0 ) -> str:
+		""" Returns a word """
+		word: str = ''
+		char: int = 1
+
+		while True:
+			if self._peek( char ) in ( ' ', '\n' ):
+				if offset > 0:
+					word = ''
+					offset -= 1
+				else:
+					break
+			else:
+				word += self._peek( char )
+			char += 1
+		return word
 
 	def _getIsWord( self, word: str | Enum ) -> bool:
 		""" Check if the next word is the give word """
@@ -360,16 +369,16 @@ class Tokenizer:
 			return True
 		return False
 
-	def _assertIsKw( self, kw: Keyword, curr: Keyword, loc: Loc, offset: int = 0 ) -> None:
+	def _assertIsKw( self, kw: Keyword | Symbol, curr: Keyword | Symbol, loc: Loc, offset: int = 0 ) -> None:
 		"""
 		Raises a fatal exception if the token at $offset is not the given keyword
 		:param kw: Expected keyword
-		:param curr: Current keywordthat requires the check
+		:param curr: Current keyword that requires the check
 		:param loc: Current keyword's location tuple
 		:param offset: Offset to check
 		:raises TokenizerError: When the token is wrong
 		"""
-		if len( self.code ) == 0 or self.code[ -1 + offset ].typ != TokenType.KEYWORD or self.code[ -1 + offset ].value != kw:
+		if len( self.code ) == 0 or self.code[ -1 + offset ].typ.name != kw.__class__.__name__.upper() or self.code[ -1 + offset ].value != kw:
 			self._fatal(
 				f'Missing {kw.name} keyword before {curr.name} keyword at line ' '{line} column {char}',
 				loc[ 1 ],
@@ -385,7 +394,7 @@ class Tokenizer:
 		"""
 		lineNum, col = lineNum or self.lineN,  col or self.char
 		err = f'ERROR: File "{self.file}", line {lineNum + 1} - {message.format( line=lineNum + 1, char=col )}\n'
-		err += self.lines[ lineNum ] + '\n'
+		err += self.lines[ lineNum ].removesuffix('\n') + '\n'
 		err += ( ' ' * ( col - 1 ) ) + '^ here'
 		raise TokenizerError( err )
 

@@ -1,6 +1,6 @@
 |* while and do-while example 19/2/2022 by ENDERZOMBI102
 *|
-DCLAR SUBROUTIN main{StRiNg() argv______} [
+DCLAR SUBROUTIN main{StRiNg() argv______} <- InTgR [
      |* while
      *|
      CHCK UNTIL { !NO } DO [
