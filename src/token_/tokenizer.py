@@ -64,6 +64,8 @@ class Tokenizer:
 				self.code += [ Token( TokenType.UNARY, UnaryType.DIVIDE, Loc.create( self, Symbol.DIV ) ) ]
 			elif self._getIsWord( Symbol.MODULO ):
 				self.code += [ Token( TokenType.UNARY, UnaryType.MODULO, Loc.create( self, Symbol.MODULO ) ) ]
+			elif self._getIsWord( Symbol.GREATER ):
+				self.code += [ Token( TokenType.UNARY, UnaryType.GREATER, Loc.create( self, Symbol.GREATER ) ) ]
 			# keywords with prefix needed
 			elif self._getIsWord( Keyword.CONSTANT ):
 				loc = Loc.create( self, Keyword.VARIABLE )
@@ -102,10 +104,15 @@ class Tokenizer:
 				self._assertIsKw( Symbol.RBRACE, Symbol.ARROW, loc )
 				self.code += [ Token( TokenType.SYMBOL, Symbol.ARROW, loc ) ]
 			elif self._getIsWord( Symbol.EQUAL ):
-				loc = Loc.create( self, Symbol.EQUAL )
-				if self.code[-1].typ != TokenType.NAME:
-					self._fatal( f'Missing NAME before = symbol at {loc}' )
-				self.code += [ Token( TokenType.SYMBOL, Symbol.EQUAL, loc ) ]
+				if self._getIsWord('<'):
+					self.code += [
+						Token( TokenType.UNARY, UnaryType.GREATER_EQUAL, Loc.create( self, Symbol.EQUAL ) )
+					]
+				else:
+					loc = Loc.create( self, Symbol.EQUAL )
+					if self.code[-1].typ != TokenType.NAME:
+						self._fatal( f'Missing NAME before = symbol at {loc}' )
+					self.code += [ Token( TokenType.SYMBOL, Symbol.EQUAL, loc ) ]
 			elif self._getIsWord( Keyword.IS ):
 				loc = Loc.create( self, Keyword.IS )
 				if self.code[-1].typ != TokenType.NAME:
