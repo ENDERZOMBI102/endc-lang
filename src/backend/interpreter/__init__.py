@@ -5,7 +5,7 @@ from typing import Any, cast
 
 from ast_.expr import Visitor, Binary, Grouping, Literal, Unary, Expr
 from backend.interpreter import errorHandler
-from tokenizer import UnaryType
+from token_ import UnaryType
 from utils import ExitError
 
 

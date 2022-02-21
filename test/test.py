@@ -6,7 +6,7 @@ import sys; sys.path.append('src')
 from pathlib import Path
 from unittest import main, TestCase
 
-import tokenizer
+from token_ import tokenizer
 from ast_ import parser
 from backend import interpreter
 
@@ -15,31 +15,28 @@ class ExpressionTest(TestCase):
 	def testTokenizerWithBadCode( self ) -> None:
 		# one line comments
 		with self.assertRaises( tokenizer.TokenizerError ):
-			tokenizer.parse( '|* comment test *|', '<test>' )
-		# opening curly brace without word/func/expression
-		with self.assertRaises( tokenizer.TokenizerError ):
-			tokenizer.parse( '{', '<test>' )
+			tokenizer.Tokenizer( '|* comment test *|', '<test>' ).tokenize().getTokens()
 		# FUNC without DCLAR or CALL
 		with self.assertRaises( tokenizer.TokenizerError ):
-			tokenizer.parse( 'FUNC', '<test>' )
+			tokenizer.Tokenizer( 'SUBROUTIN', '<test>' ).tokenize().getTokens()
 		# unfinished string
 		with self.assertRaises( tokenizer.TokenizerError ):
-			tokenizer.parse( '*/\n', '<test>' )
+			tokenizer.Tokenizer( '*/\n', '<test>' ).tokenize().getTokens()
 		# CONSTANT without DCLAR
 		with self.assertRaises( tokenizer.TokenizerError ):
-			tokenizer.parse( 'CONSTANT', '<test>' )
+			tokenizer.Tokenizer( 'CONSTANT', '<test>' ).tokenize().getTokens()
 		# BACK without GIV
 		with self.assertRaises( tokenizer.TokenizerError ):
-			tokenizer.parse( 'BACK', '<test>' )
+			tokenizer.Tokenizer( 'BACK', '<test>' ).tokenize().getTokens()
 		# line without /
 		with self.assertRaises( tokenizer.TokenizerError ):
-			tokenizer.parse( 'GIV BACK 0', '<test>' )
+			tokenizer.Tokenizer( 'GIV BACK 0', '<test>' ).tokenize().getTokens()
 
 	def testTokenizerWithGoodCode( self ) -> None:
 		for example in Path('examples').glob('*.endc'):
 			with self.subTest():
 				try:
-					tokenizer.parse( example.read_text(), example.name )
+					tokenizer.Tokenizer( example.read_text(), example.name )
 				except tokenizer.TokenizerError as e:
 					assert False, f'Failed on example "{example.name}": {e.args}'
 
@@ -47,7 +44,12 @@ class ExpressionTest(TestCase):
 		for example in Path('examples').glob('*.endc'):
 			with self.subTest():
 				try:
-					parser.Parser( tokenizer.parse( example.read_text(), example.name ) ).parse()
+					parser.Parser(
+						tokenizer.Tokenizer(
+							example.read_text(),
+							example.name
+						).tokenize().getTokens()
+					).parse()
 				except parser.ParseError as e:
 					assert False, f'Failed on example "{example.name}": {e.args}'
 
@@ -57,10 +59,10 @@ class ExpressionTest(TestCase):
 				try:
 					interpreter.Interpreter().interpret(
 						parser.Parser(
-							tokenizer.parse(
+							tokenizer.Tokenizer(
 								example.read_text(),
 								example.name
-							)
+							).tokenize().getTokens()
 						).parse()
 					)
 				except parser.ParseError as e:
