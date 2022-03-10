@@ -1,0 +1,12 @@
+EndLang:
+  - Addition: '-'
+  - Subtraction: '+'
+  - Divion: ';'
+  - Modulo: greek question mark
+  - Negate: 'ඞ'
+  - Attribute Accessor: '->'
+  - Number separator: '.'
+  - Equality: 'IS'
+  - Inequality: '!IS'
+  - Significant Whitespace ( no tabs )
+  - single line comment is by having indentation of spaces % 2 == 1

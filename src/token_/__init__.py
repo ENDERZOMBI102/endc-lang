@@ -76,14 +76,15 @@ class Symbol(Enum):
 	COMMA = ','
 	EQUAL = '='
 	SUB = '+'
-	BANG = '!'
+	BANG = 'ඞ'
 	DIV = ';'
 	ADD = '-'
-	MODULO = '\\'
+	MODULO = ';'  # greek question mark
 	GREATER = '<'
 	GREATER_EQUAL = '=<'
 	DOT = '.'
-	ARROW = '<-'
+	ARROWL = '<-'
+	ARROWR = '->'
 
 
 class UnaryType(Enum):

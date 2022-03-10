@@ -7,7 +7,9 @@ from os import PathLike
 from dataclasses import dataclass
 from enum import Enum
 from typing import Optional, Final
+from pathlib import Path
 
+from cli import Arguments
 from token_ import Token, Symbol, TokenType, Keyword, Loc, UnaryType
 
 
@@ -16,6 +18,7 @@ __all__ = [
 	'TokenizerError'
 ]
 _HARDCORE: Final[ bool ] = False
+config: Arguments
 
 
 @dataclass
@@ -30,7 +33,7 @@ class Tokenizer:
 	lineN: int = 0
 	char: int = 0
 	num: str = ''
-	file: str
+	file: Path
 	line: str
 
 	def __init__( self, codeString: str, file: str ) -> None:
@@ -39,7 +42,7 @@ class Tokenizer:
 		:param file: original file
 		"""
 		self.lines = codeString.splitlines( True )
-		self.file = file
+		self.file = Path( file )
 		self.code = []
 
 	def tokenize( self ) -> Tokenizer:
@@ -106,10 +109,10 @@ class Tokenizer:
 				loc = Loc.create( self, Keyword.IF )
 				self._assertIsKw( Keyword.CHECK, Keyword.IF, loc )
 				self.code += [ Token( TokenType.KEYWORD, Keyword.IF, loc ) ]
-			elif self._getIsWord( Symbol.ARROW ):
-				loc = Loc.create( self, Symbol.ARROW )
-				self._assertIsKw( Symbol.RBRACE, Symbol.ARROW, loc )
-				self.code += [ Token( TokenType.SYMBOL, Symbol.ARROW, loc ) ]
+			elif self._getIsWord( Symbol.ARROWL ):
+				loc = Loc.create( self, Symbol.ARROWL )
+				self._assertIsKw( Symbol.RBRACE, Symbol.ARROWL, loc )
+				self.code += [ Token( TokenType.SYMBOL, Symbol.ARROWL, loc ) ]
 			elif self._getIsWord( Symbol.EQUAL ):
 				if self._getIsWord('<'):
 					self.code += [
@@ -156,10 +159,10 @@ class Tokenizer:
 				self.code += [ Token( TokenType.KEYWORD, Keyword.SUBROUTINE, loc ) ]
 			elif self._getIsWord( Keyword.WHEN ):
 				loc = Loc.create( self, Keyword.WHEN )
-				if self.code[-1].value != Keyword.UNTIL:
-					self._fatal( f'Missing UNTIL keyword before WHEN keyword at {loc}' )
-				if self._peekIgnoreSpaces() != Symbol.LBRACE.value:
-					self._fatal( f'Missing LBRACE symbol after WHEN keyword at {loc}' )
+				if self.code[-1].value not in ( Keyword.UNTIL, Symbol.LBRACE.value ):
+					self._fatal( f'Missing UNTIL keyword or LBRACE symbol before WHEN keyword at {loc}' )
+				if self._peekIgnoreSpaces() not in ( Symbol.LBRACE.value, Keyword.FINISHED ):
+					self._fatal( f'Missing LBRACE symbol or FINISHED keyword after WHEN keyword at {loc}' )
 				self.code += [ Token( TokenType.KEYWORD, Keyword.WHEN, loc ) ]
 			elif self._getIsWord( Keyword.UNTIL ):
 				loc = Loc.create( self, Keyword.UNTIL )
@@ -347,6 +350,9 @@ class Tokenizer:
 
 	# PRIVATE METHODS
 
+	def _getFile( self ) -> str:
+		return './' + str( self.file ).replace('\\', '/')
+
 	def _getChar( self ) -> str:
 		""" Returns and consume a char """
 		if self.char + 1 < len( self.line ):
@@ -416,7 +422,8 @@ class Tokenizer:
 		:param col: Column where the error originated
 		"""
 		lineNum, col = lineNum or self.lineN,  col or self.char
-		err = f'ERROR: File "{self.file}", line {lineNum + 1} - {message.format( line=lineNum + 1, char=col )}\n'
+		err = f'at line {lineNum + 1} in file {self._getFile()}: {message.format( line=lineNum + 1, char=col )}\n'
+		# err = f'{self._getFile()}:{lineNum + 1}:{col}: {message.format( line=lineNum + 1, char=col )}\n'
 		err += self.lines[ lineNum ].removesuffix('\n') + '\n'
 		err += ( ' ' * ( col - 1 ) ) + '^ here'
 		raise TokenizerError( err )
@@ -426,7 +433,7 @@ if __name__ == '__main__':
 	from time import time
 	from pathlib import Path
 	from pprint import pprint
-	from sys import argv
+	from sys import argv, stderr
 
 	from utils import ExitError
 
@@ -441,6 +448,8 @@ if __name__ == '__main__':
 		)
 	except ExitError as e:
 		exitCode = e.code
+	except TokenizerError as e:
+		print( e.message, file=stderr )
 
 	print(f'Done in {time() - start}')
 	exit(exitCode)

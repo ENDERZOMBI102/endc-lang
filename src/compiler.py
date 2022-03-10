@@ -15,10 +15,10 @@ from typing import cast, Union
 from time import time
 from importlib import import_module
 
+from cli import args
 from backend import BACKENDS
 import ast_.parser
-import tokenizer
-from cli import args
+import token_.tokenizer
 from log import warn, info, error
 from utils import ExitError
 from platforms import Platform
@@ -49,11 +49,17 @@ def main() -> int:
 		args.file = args.file or Path( cast( str, cfg['defaultFile'] ) )
 		args.backend = args.backend or Platform.findAdeguate( cfg.get('defaultBackend', 'inter') )
 		args.verboseLevel = cast( int, cfg.get( 'verboseLevel', args.verboseLevel ) )
+		args.logStyle = cast( str, cfg.get( 'logStyle', args.logStyle ) )
 		args.postCompileScript = (
 			args.postCompileScript or
 			Path( cast( str, cfg.get('postCompileScript') ) ) if cfg.get('postCompileScript') else None
 		)
+	elif args.genConfig:
+		cfgFile.write_text('{\n\t"defaultFile": "examples/expression.endc",\n\t"postCompileScript": null,\n\t"defaultBackend": "inter",\n\t"verboseLevel": 0,\n\t"logStyle": "fancy"\n}')
+		print( f'[INFO] Written default config to {cfgFile}' )
+		return 0
 
+	ast_.parser.config = token_.tokenizer.config = args
 	exitCode: int = 0
 	# execute build
 	try:
@@ -67,10 +73,11 @@ def main() -> int:
 		info( f'Compiling {args.file}')
 
 		info( f'Tokenizing..')
-		tokens = tokenizer.parse( args.file.read_text(), str( args.file ) )
+		tokenizer = token_.tokenizer.Tokenizer( args.file.read_text(), str( args.file ) )
+		tokenizer.tokenize()
 
 		info( f'Generating AST..')
-		ast = ast_.parser.Parser( tokens ).parse()
+		ast = ast_.parser.Parser( tokenizer.getTokens() ).parse()
 		if ast is None:
 			error( f'Failed to generate AST, aborting.' )
 			return 1
@@ -98,6 +105,8 @@ def main() -> int:
 
 	except ExitError as e:
 		return e.code
+	except token_.tokenizer.TokenizerError as e:
+		error( e.message )
 	return exitCode
 
 

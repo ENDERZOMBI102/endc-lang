@@ -126,11 +126,11 @@ operator : SUB|DIV|ADD|MODULO|GT|GE|IS|OR|AND|ARROWR ; // no implicit precedence
 // SYMBOLS
 LPAREN : '(' ;
 RPAREN : ')' ;
-COLON : ':' ;
 LBRACK : '[' ;
 RBRACK : ']' ;
 LBRACE : '{' ;
 RBRACE : '}' ;
+COLON : ':' ;
 COMMA : ',' ;
 EQUAL : '=' ;
 SUB : '+' ;
@@ -147,8 +147,8 @@ ARROWR : '->' ;
 // KEYWORDS
 // OP KEYWORDS
 IS : 'IS' ;
-OR : 'OTHERWISE' ;
-AND : 'FUTHERMORE' ;
+OR : 'OTHRWIS' ;
+AND : 'FUTHRMOR' ;
 // CONTROL FLOW KEYWORDS
 IF : 'IF' ;
 ELSE : 'LS' ;
@@ -173,7 +173,6 @@ OWN : 'OWN' ;
 FROM : 'FROM' ;
 INITIALIZER : 'INITIALIZR' ;
 DEINITIALIZER : 'DINITIALIZR' ;
-
 // CONSTANTS
 ME : 'M' ;
 FALSE : 'NO' ;

@@ -6,9 +6,11 @@ from typing import Final, Union, Optional
 
 from ast_ import ParseError
 from ast_.expr import Expr, Binary, Unary, Literal, Grouping
+from cli import Arguments
 from token_ import Token, Keyword, TokenType, UnaryType, Loc, Symbol
 
 hadError: bool = False
+config: Arguments
 
 
 def report(line: int, where: str, message: str) -> None:
