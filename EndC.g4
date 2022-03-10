@@ -73,6 +73,7 @@ statement
 	|	call_expr '/'																		# CallStatement
 	|	GIVE BACK expr '/'																	# Return
 	|	func_block '/'				 														# BlockStatement
+	|	DECLARE SECTION ASM '{' backends '}' asm_block '/'									# BlockAsm
 	;
 
 // EXPRESSIONS
@@ -122,6 +123,12 @@ type
 qualified_name : IDENTIFIER ( ARROWR IDENTIFIER )* ;
 
 operator : SUB|DIV|ADD|MODULO|GT|GE|IS|OR|AND|ARROWR ; // no implicit precedence
+
+
+backends : DOTNET|LLVM|WASM|NEKO|HASHLINK|JVM|PYTHON|JAVASCRIPT ;
+
+asm_block : '[' (.^\])*? ']' ;
+
 
 // SYMBOLS
 LPAREN : '(' ;
@@ -173,6 +180,17 @@ OWN : 'OWN' ;
 FROM : 'FROM' ;
 INITIALIZER : 'INITIALIZR' ;
 DEINITIALIZER : 'DINITIALIZR' ;
+SECTION : 'SCTION' ;
+ASM : 'ASM' ;
+// BACKENDS
+DOTNET : 'DOTNET' ;
+LLVM : 'LLVM' ;
+WASM : 'WASM' ;
+NEKO : 'NEKO' ;
+HASHLINK : 'HASHLINK' ;
+JVM : 'JVM' ;
+PYTHON : 'PYTHON' ;
+JAVASCRIPT : 'JAVASCRIPT' ;
 // CONSTANTS
 ME : 'M' ;
 FALSE : 'NO' ;

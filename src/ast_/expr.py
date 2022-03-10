@@ -10,7 +10,6 @@ from token_ import Token
 
 
 R = TypeVar("R")
-Object = object
 
 
 class Visitor(Generic[R], metaclass=ABCMeta):
@@ -28,13 +27,17 @@ class Visitor(Generic[R], metaclass=ABCMeta):
 		pass
 	
 	@abstractmethod
+	def visitAsmLiteralExpr( self, asmliteral: 'AsmLiteral' ) -> R:
+		pass
+	
+	@abstractmethod
 	def visitUnaryExpr( self, unary: 'Unary' ) -> R:
 		pass
 
 
 class Expr(metaclass=ABCMeta):
 	@abstractmethod
-	def accept( self, visitor: Visitor[R] ) -> R:
+	def accept(self, visitor: Visitor[R]) -> R:
 		pass
 
 
@@ -58,10 +61,19 @@ class Grouping(Expr):
 
 @dataclass
 class Literal(Expr):
-	value: Object
+	value: object
 	
 	def accept( self, visitor: Visitor[R] ) -> R:
 		return visitor.visitLiteralExpr(self)
+
+
+@dataclass
+class AsmLiteral(Expr):
+	backend: str
+	code: str
+	
+	def accept( self, visitor: Visitor[R] ) -> R:
+		return visitor.visitAsmLiteralExpr(self)
 
 
 @dataclass

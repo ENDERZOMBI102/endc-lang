@@ -58,6 +58,17 @@ class Keyword(Enum):
 	FROM = 'FROM'
 	INITIALIZER = 'INITIALIZR'
 	DEINITIALIZER = 'DINITIALIZR'
+	SECTION = 'SCTION'
+	ASM = 'ASM'
+	# BACKENDS
+	DOTNET = 'DOTNET'
+	LLVM = 'LLVM'
+	WASM = 'WASM'
+	NEKO = 'NEKO'
+	HASHLINK = 'HASHLINK'
+	JVM = 'JVM'
+	PYTHON = 'PYTHON'
+	JAVASCRIPT = 'JAVASCRIPT'
 	# CONSTANTS
 	ME = 'M'
 	FALSE = 'NO'
@@ -106,6 +117,7 @@ class TokenType(Enum):
 	KEYWORD = auto()
 	SYMBOL = auto()
 	UNARY = auto()
+	ASM = auto()
 	EOF = auto()
 
 

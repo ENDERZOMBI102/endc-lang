@@ -229,6 +229,36 @@ class Tokenizer:
 					offset -= 1
 				self.code += [ Token( TokenType.KEYWORD, Keyword.FROM, loc ) ]
 				del offset, OWN_OR_DOT, NAME, expect
+			elif self._getIsWord( Keyword.SECTION ):
+				if not self._getIsWord( Keyword.ASM ):
+					self._fatal( 'Missing ASM keyword after SECTION declaration.' )
+				if not self._getIsWord( Symbol.LBRACE ):  # TODO: make it handle PYTHON} case
+					self._fatal( 'Missing LBRACE symbol after ASM keyword.' )
+				if ( backend := self._peekWord() ) not in ( 'DOTNET', 'LLVM', 'WASM', 'NEKO', 'HASHLINK', 'JVM', 'PYTHON', 'JAVASCRIPT' ):
+					self._fatal( f'Invalid ASM target "{backend}" found, aborting.' )
+				self._getIsWord( backend )
+				if not self._getIsWord( Symbol.RBRACE ):
+					self._fatal( f'Missing RBRACE symbol after {backend} keyword.' )
+				if not self._getIsWord( Symbol.LBRACK ):
+					self._fatal( 'Missing LBRACK symbol after RBRACE symbol.' )
+
+				# get all code in the next two lines
+				asmCode = ''
+				line = 0
+				while ( val := self._peek() ) != ']' and line > 4:
+					if val == '\n':
+						line += 1
+						self.lineN += 1
+						self.char = 0
+					asmCode += val
+					self.char += 1
+
+				self.code += [
+					Token( TokenType.ASM, Keyword[backend], Loc.create( self, backend ) ),
+					Token( TokenType.ASM, asmCode, Loc.create( self, backend ) ),
+				]
+
+				del backend, asmCode, line
 			elif self._getIsWord( '|*' ):
 				startLine: int = self.lineN
 				found = False
