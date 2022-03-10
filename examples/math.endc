@@ -4,7 +4,7 @@ DCLAR SUBROUTIN main{StRiNg() argv______} <- InTgR[
      DCLAR CONSTANT StRiNg ADDPRINTTXT = *9 - 3 = */
      DCLAR CONSTANT StRiNg SUBTRACTPRINTTXT = *\n9 + 3 = */
      DCLAR CONSTANT StRiNg DIVIDPRINTTXT = *\n9 ; 3 = */
-     DCLAR CONSTANT StRiNg MODULOPRINTTXT = *\n9 \ 3 = */
+     DCLAR CONSTANT StRiNg MODULOPRINTTXT = *\n9 ; 3 = */
      CALL printto{ STDOUT. ADDPRINTTXT }/
      CALL printto{ STDOUT. 9 - 3 }/
      CALL printto{ STDOUT. SUBTRACTPRINTTXT }/
@@ -12,6 +12,6 @@ DCLAR SUBROUTIN main{StRiNg() argv______} <- InTgR[
      CALL printto{ STDOUT. DIVIDPRINTTXT }/
      CALL printto{ STDOUT. 9 ; 3 }/
      CALL printto{ STDOUT. MODULOPRINTTXT }/
-     CALL printto{ STDOUT. 9 \ 3 }/
+     CALL printto{ STDOUT. 9 ; 3 }/
      GIV BACK 0/
 ]

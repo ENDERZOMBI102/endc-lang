@@ -5,10 +5,14 @@ DCLAR SUBROUTIN main{StRiNg() argv______} <- InTgR [
      *|
      CHCK UNTIL { !NO } DO [
 
+     ] WHN FINISHD DO [
+
      ]/
      |* do while
      *|
      DO [
 
-     ] UNTIL WHN { !NO }/
+     ] UNTIL WHN { !NO } WHN FINISHD DO [
+
+     ]/
 ]

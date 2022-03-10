@@ -3,6 +3,6 @@ DCLAR SUBROUTIN main{StRiNg() argv______} <- InTgR [
      *|
      GIV BACK CALL SUBROUTIN{StRiNg arg0______} <- InTgR [
           CALL printto{ STDOUT. arg0______ }/
-          GIV BACK CALL arg0______,siz{}/
+          GIV BACK CALL arg0______->siz{}/
      ]{argv______(0)}/
 ]

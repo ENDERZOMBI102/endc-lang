@@ -18,11 +18,11 @@ importable : IDENTIFIER ;
 
 // DECLARATIONS
 function
-	:	EXPORT? DECLARE SUBRUTINE IDENTIFIER func_args ARROW type func_block
+	:	EXPORT? DECLARE SUBRUTINE IDENTIFIER func_args ARROWL type func_block
 	;
 
 method
-	:	DECLARE BEHAVIOR IDENTIFIER func_args ARROW type func_block
+	:	DECLARE BEHAVIOR IDENTIFIER func_args ARROWL type func_block
 	;
 
 template
@@ -65,8 +65,9 @@ template_block
 func_block :  '[' (statement|vardef)* ']' ;
 
 statement
-	:	CHECK IF '{' expr '}' DO func_block ( ELSE DO func_block )?							# If
-	|	CHECK UNTIL '{' expr '}' DO func_block ( WHEN FINISHED DO func_block )?				# Until
+	:	CHECK IF '{' expr '}' DO func_block ( ELSE DO func_block )?	'/'						# If
+	|	CHECK UNTIL '{' expr '}' DO func_block ( WHEN FINISHED DO func_block )?	'/'			# Until
+	|	DO func_block UNTIL WHEN '{' expr '}' ( WHEN FINISHED DO func_block )?	'/'			# DoUntil
 	|	qualified_name '=' expr '/'															# Assign
 	|	qualified_name '(' expr ')' '=' expr '/'											# ElementAssign
 	|	call_expr '/'																		# CallStatement
@@ -77,8 +78,8 @@ statement
 // EXPRESSIONS
 expr
 	:	expr operator expr									# Op
-	|	'-' expr											# Negate
-	|	'!' expr											# Not
+	|	ADD expr											# Negate
+	|	BANG expr											# Not
 	|	call_expr											# Call
 	|	qualified_name '(' expr ')'							# Index
 	|	'{' expr '}'										# Parens
@@ -86,12 +87,12 @@ expr
 	|	anonim_function										# AnonimFunction
 	;
 
-anonim_function	: SUBRUTINE func_args ARROW type func_block ;
+anonim_function	: SUBRUTINE func_args ARROWL type func_block ;
 
 call_expr
 	: CALL qualified_name arguments									# SimpleCall
 	| CALL BUILD IDENTIFIER arguments								# TemplateInstantiation
-	| CALL '{' ( call_expr ) '}' ',' qualified_name arguments		# NestedCall
+	| CALL '{' call_expr '}' ARROWR qualified_name arguments		# NestedCall
 	| CALL anonim_function arguments								# DirectCall
 	;
 
@@ -118,31 +119,30 @@ type
 	|	IDENTIFIER											# CustomTypeSpec
 	;
 
-qualified_name
-    :   IDENTIFIER ( ',' IDENTIFIER )*
-    ;
+qualified_name : IDENTIFIER ( ARROWR IDENTIFIER )* ;
 
-operator  : SUB|DIV|ADD|MODULO|GT|GE|IS|OR|AND|COMMA ; // no implicit precedence
+operator : SUB|DIV|ADD|MODULO|GT|GE|IS|OR|AND|ARROWR ; // no implicit precedence
 
 // SYMBOLS
 LPAREN : '(' ;
 RPAREN : ')' ;
 COLON : ':' ;
-COMMA : ',' ;
 LBRACK : '[' ;
 RBRACK : ']' ;
 LBRACE : '{' ;
 RBRACE : '}' ;
+COMMA : ',' ;
 EQUAL : '=' ;
 SUB : '+' ;
-BANG : '!' ;
+BANG : 'ඞ' ;
 DIV : ';' ;
 ADD : '-' ;
-MODULO : '\\' ;
+MODULO : ';' ;  // greek question mark
 GT : '<' ;
 GE : '=<' ;
 DOT : '.' ;
-ARROW : '<-' ;
+ARROWL : '<-' ;
+ARROWR : '->' ;
 
 // KEYWORDS
 // OP KEYWORDS
@@ -185,7 +185,7 @@ COMMENT : '|*' .*? '*|' -> channel(HIDDEN) ;
 IDENTIFIER : [a-zA-Z_]([a-zA-Z0-9_])+ ;
 INT : [0-9]+ ;
 FLOAT
-	:   '-'? INT '.' INT EXP?   // 1.35, 1.35E-9, 0.3, -4.5
+	:   '-'? INT COMMA INT EXP?   // 1.35, 1.35E-9, 0.3, -4.5
 	|   '-'? INT EXP            // 1e10 -3e4
 	|	'-'? COMMA INT
 	;

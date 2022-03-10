@@ -3,8 +3,8 @@
 DCLAR SUBROUTIN main{StRiNg() argv______} <- InTgR [
      |* this is "true"
      *|
-     DCLAR CONSTANT BoOlAn thisWillBChckd = !NO/
-     CHCK IF { thisWillBChckd IS !NO } DO [
+     DCLAR CONSTANT BoOlAn thisWillBChckd = ඞNO/
+     CHCK IF { thisWillBChckd IS ඞNO } DO [
           DCLAR CONSTANT StRiNg printtotxt = *it was true*/
           CALL printto{ STDOUT. printtotxt }/
      ] LS DO [
