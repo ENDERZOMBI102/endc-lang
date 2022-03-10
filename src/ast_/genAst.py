@@ -44,7 +44,7 @@ def defineType( writer: PythonWriter, baseName: str, className: str, fields: lis
 	writer.write(f'class {className}({baseName}):')
 	with writer:
 		for field in fields:
-			writer.write( ': '.join( field.split()[::-1] ) )
+			writer.write( ': '.join( field.replace('Object', 'object').split()[::-1] ) )
 		writer.write('')
 		writer.write('def accept( self, visitor: Visitor[R] ) -> R:')
 		with writer:
@@ -79,7 +79,6 @@ def defineAst( outputDir: Path, baseName: str, types: list[str] ) -> None:
 	writer.write('from tokenizer import Token')
 	writer.dup()
 	writer.write('R = TypeVar("R")')
-	writer.write('Object = object')
 	writer.dup()
 	# visitor class
 	defineVisitor( writer, baseName, types )
