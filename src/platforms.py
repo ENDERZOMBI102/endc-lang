@@ -17,7 +17,7 @@ class Platform(Enum):
 	def findAdeguate( cls, name: Union[ str, 'Platform' ] ) -> 'Platform':
 		if isinstance( name, Platform ):
 			return name
-		for platform in cls:
-			if platform.value == name:
-				return platform
-		raise ValueError(f'Platform not found: {name}')
+		try:
+			return Platform[ name.upper() ]
+		except:
+			raise ValueError(f'Platform not found: {name}')

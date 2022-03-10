@@ -6,7 +6,7 @@ from cli import args
 
 def _log(level: int, msg: str, file: TextIO) -> None:
 	if args.verboseLevel <= level:
-		print(msg, file=file)
+		print(msg, file=file, flush=True)
 
 
 def debug(msg: str, file: TextIO = sys.stdout) -> None:

@@ -1,7 +1,7 @@
 {
 	"defaultFile": "examples/expression.endc",
 	"postCompileScript": null,
-	"defaultBackend": "inter",
+	"defaultBackend": "interpreter",
 	"verboseLevel": 0,
 	"logStyle": "fancy"
 }

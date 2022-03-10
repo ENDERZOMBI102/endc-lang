@@ -15,7 +15,7 @@ from typing import cast, Union
 from time import time
 from importlib import import_module
 
-from cli import args
+from cli import args, LogStyle, Stage
 from backend import BACKENDS
 import ast_.parser
 import token_.tokenizer
@@ -47,15 +47,16 @@ def main() -> int:
 		print( f'[INFO] Using config at {cfgFile}' )
 		cfg: dict[ str, Union[ str, int ] ] = loads( cfgFile.read_text() )
 		args.file = args.file or Path( cast( str, cfg['defaultFile'] ) )
-		args.backend = args.backend or Platform.findAdeguate( cfg.get('defaultBackend', 'inter') )
+		args.backend = args.backend or Platform.findAdeguate( cfg.get('defaultBackend', 'interpreter') )
 		args.verboseLevel = cast( int, cfg.get( 'verboseLevel', args.verboseLevel ) )
-		args.logStyle = cast( str, cfg.get( 'logStyle', args.logStyle ) )
+		args.logStyle = LogStyle[ cfg.get( 'logStyle', args.logStyle.value ).upper() ]
+		args.exitAtStage = Stage[ cfg.get( 'exitAtStage', args.exitAtStage.value ).upper() ]
 		args.postCompileScript = (
 			args.postCompileScript or
 			Path( cast( str, cfg.get('postCompileScript') ) ) if cfg.get('postCompileScript') else None
 		)
 	elif args.genConfig:
-		cfgFile.write_text('{\n\t"defaultFile": "examples/expression.endc",\n\t"postCompileScript": null,\n\t"defaultBackend": "inter",\n\t"verboseLevel": 0,\n\t"logStyle": "fancy"\n}')
+		cfgFile.write_text('{\n\t"defaultFile": "examples/expression.endc",\n\t"postCompileScript": null,\n\t"defaultBackend": "interpreter",\n\t"verboseLevel": 0,\n\t"logStyle": "fancy"\n}')
 		print( f'[INFO] Written default config to {cfgFile}' )
 		return 0
 
@@ -75,12 +76,16 @@ def main() -> int:
 		info( f'Tokenizing..')
 		tokenizer = token_.tokenizer.Tokenizer( args.file.read_text(), str( args.file ) )
 		tokenizer.tokenize()
+		if args.exitAtStage is Stage.TOKENIZATION:
+			return 0
 
 		info( f'Generating AST..')
 		ast = ast_.parser.Parser( tokenizer.getTokens() ).parse()
 		if ast is None:
 			error( f'Failed to generate AST, aborting.' )
 			return 1
+		elif args.exitAtStage is Stage.AST:
+			return 0
 
 		info( f'Selecting backend..')
 		try:
@@ -95,6 +100,8 @@ def main() -> int:
 
 		info( f'Executing backend "{backend.name}"..')
 		exitCode: int = import_module( backend.pkg ).backendMain(ast)  # type: ignore
+		if args.exitAtStage is Stage.BACKEND:
+			return 0
 
 		if args.postCompileScript:
 			if not args.postCompileScript.exists():

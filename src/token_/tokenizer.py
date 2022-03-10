@@ -422,8 +422,10 @@ class Tokenizer:
 		:param col: Column where the error originated
 		"""
 		lineNum, col = lineNum or self.lineN,  col or self.char
-		err = f'at line {lineNum + 1} in file {self._getFile()}: {message.format( line=lineNum + 1, char=col )}\n'
-		# err = f'{self._getFile()}:{lineNum + 1}:{col}: {message.format( line=lineNum + 1, char=col )}\n'
+		if config.logStyle.fancy():
+			err = f'at line {lineNum + 1} in file {self._getFile()}: {message.format( line=lineNum + 1, char=col )}\n'
+		else:
+			err = f'{self._getFile()}:{lineNum + 1}:{col}: {message.format( line=lineNum + 1, char=col )}\n'
 		err += self.lines[ lineNum ].removesuffix('\n') + '\n'
 		err += ( ' ' * ( col - 1 ) ) + '^ here'
 		raise TokenizerError( err )

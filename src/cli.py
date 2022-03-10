@@ -15,6 +15,9 @@ class LogStyle(Enum):
 	FANCY = 'fancy'
 	SIMPLE = 'simple'
 
+	def fancy( self ) -> bool:
+		return self is LogStyle.FANCY
+
 
 class Stage(Enum):
 	TOKENIZATION = 'tokenization'
@@ -37,8 +40,9 @@ parser.add_argument(
 parser.add_argument(
 	'-b',
 	'--backend',
-	help='Must be one of "inter", "llvm", "wasm", "py", "jvm", "neko" or "js"',
+	help='Backend to run after parsing',
 	action='store',
+	choices=list(Platform),
 	type=Platform.findAdeguate,
 	dest='backend'
 )
