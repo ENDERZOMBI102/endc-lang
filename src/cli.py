@@ -129,14 +129,14 @@ parser.add_argument(
 	help='Dumps the tokens generated from a file to $FILENAME.tks',
 	action='store_true',
 	default=False,
-	dest='exitAtStage'
+	dest='dumpTokens'
 )
 parser.add_argument(
 	'--dump-ast',
 	help='Dumps the ast generated from a file to $FILENAME.ast',
 	action='store_true',
 	default=False,
-	dest='exitAtStage'
+	dest='dumpAst'
 )
 parser.add_argument(
 	'--execpyfile',

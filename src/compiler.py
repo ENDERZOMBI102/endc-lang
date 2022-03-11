@@ -79,7 +79,7 @@ def main() -> int:
 		tokenizer.tokenize()
 		if args.dumpTokens:
 			(
-				args.file.parent / f'{args.file.name.removesuffix(".endc").removesuffix(".ec")}.ast'
+				args.file.parent / f'{args.file.name.removesuffix(".endc").removesuffix(".ec")}.tks'
 			).write_text( '\n'.join( map( str, tokenizer.getTokens() ) ) )
 		if args.exitAtStage is Stage.TOKENIZATION:
 			return 0
@@ -90,7 +90,7 @@ def main() -> int:
 			error( f'Failed to generate AST, aborting.' )
 			return 1
 		if args.dumpAst:
-			astFile = args.file.parent / f'{args.file.name.removesuffix( ".endc" ).removesuffix( ".ec" )}.tks'
+			astFile = args.file.parent / f'{args.file.name.removesuffix( ".endc" ).removesuffix( ".ec" )}.ast'
 			with astFile.open( 'w' ) as file:
 				ast_.astPrinter.AstPrinter( file ).print( ast )
 			del file, astFile
