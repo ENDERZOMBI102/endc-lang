@@ -42,7 +42,7 @@ parser.add_argument(
 	'--backend',
 	help='Backend to run after parsing',
 	action='store',
-	choices=list(Platform),
+	choices=[ elem.value for elem in Platform ],
 	type=Platform.findAdeguate,
 	dest='backend'
 )
@@ -114,7 +114,7 @@ parser.add_argument(
 	help='Defines how errors and warnings indicate the line and character it originates from',
 	action='store',
 	default='fancy',
-	choices=list( LogStyle ),
+	choices=[ elem.value for elem in LogStyle ],
 	type=lambda value: LogStyle[value.upper()],
 	dest='logStyle'
 )
@@ -123,7 +123,7 @@ parser.add_argument(
 	help='Stops execution at a given step',
 	action='store',
 	default='tokenization',
-	choices=list( Stage ),
+	choices=[ elem.value for elem in Stage ],
 	type=lambda value: Stage[value.upper()],
 	dest='exitAtStage'
 )
