@@ -47,10 +47,10 @@ def main() -> int:
 		print( f'[INFO] Using config at {cfgFile}' )
 		cfg: dict[ str, Union[ str, int ] ] = loads( cfgFile.read_text() )
 		args.file = args.file or Path( cast( str, cfg['defaultFile'] ) )
-		args.backend = args.backend or Platform.findAdeguate( cfg.get('defaultBackend', 'interpreter') )
+		args.backend = Platform.findAdeguate( args.backend or cfg.get('defaultBackend', 'interpreter') )
 		args.verboseLevel = cast( int, cfg.get( 'verboseLevel', args.verboseLevel ) )
-		args.logStyle = LogStyle[ cfg.get( 'logStyle', args.logStyle.value ).upper() ]
-		args.exitAtStage = Stage[ cfg.get( 'exitAtStage', args.exitAtStage.value ).upper() ]
+		args.logStyle = LogStyle[ cfg.get( 'logStyle', args.logStyle ).upper() ]
+		args.exitAtStage = Stage[ cfg.get( 'exitAtStage', args.exitAtStage ).upper() ]
 		args.postCompileScript = (
 			args.postCompileScript or
 			Path( cast( str, cfg.get('postCompileScript') ) ) if cfg.get('postCompileScript') else None

@@ -43,7 +43,6 @@ parser.add_argument(
 	help='Backend to run after parsing',
 	action='store',
 	choices=[ elem.value for elem in Platform ],
-	type=Platform.findAdeguate,
 	dest='backend'
 )
 parser.add_argument(
@@ -115,7 +114,6 @@ parser.add_argument(
 	action='store',
 	default='fancy',
 	choices=[ elem.value for elem in LogStyle ],
-	type=lambda value: LogStyle[value.upper()],
 	dest='logStyle'
 )
 parser.add_argument(
@@ -124,7 +122,6 @@ parser.add_argument(
 	action='store',
 	default='tokenization',
 	choices=[ elem.value for elem in Stage ],
-	type=lambda value: Stage[value.upper()],
 	dest='exitAtStage'
 )
 parser.add_argument(
