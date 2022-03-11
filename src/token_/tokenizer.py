@@ -230,13 +230,15 @@ class Tokenizer:
 				self.code += [ Token( TokenType.KEYWORD, Keyword.FROM, loc ) ]
 				del offset, OWN_OR_DOT, NAME, expect
 			elif self._getIsWord( Keyword.SECTION ):
+				if self.code[-1].value is not Keyword.DECLARE:
+					self._fatal( 'Missing DECLARE keyword before SECTION keyword.' )
+
 				if not self._getIsWord( Keyword.ASM ):
 					self._fatal( 'Missing ASM keyword after SECTION declaration.' )
 				if not self._getIsWord( Symbol.LBRACE ):  # TODO: make it handle PYTHON} case
 					self._fatal( 'Missing LBRACE symbol after ASM keyword.' )
-				if ( backend := self._peekWord() ) not in ( 'DOTNET', 'LLVM', 'WASM', 'NEKO', 'HASHLINK', 'JVM', 'PYTHON', 'JAVASCRIPT' ):
-					self._fatal( f'Invalid ASM target "{backend}" found, aborting.' )
-				self._getIsWord( backend )
+				if backend := self._getIsWords( 'DOTNET', 'LLVM', 'WASM', 'NEKO', 'HASHLINK', 'JVM', 'PYTHON', 'JAVASCRIPT' ):
+					self._fatal( f'Invalid ASM target "{self._peekWord().removesuffix("}")}" found, aborting.' )
 				if not self._getIsWord( Symbol.RBRACE ):
 					self._fatal( f'Missing RBRACE symbol after {backend} keyword.' )
 				if not self._getIsWord( Symbol.LBRACK ):
@@ -258,7 +260,7 @@ class Tokenizer:
 					Token( TokenType.ASM, asmCode, Loc.create( self, backend ) ),
 				]
 
-				del backend, asmCode, line
+				del backend, asmCode, line, val
 			elif self._getIsWord( '|*' ):
 				startLine: int = self.lineN
 				found = False
@@ -418,15 +420,30 @@ class Tokenizer:
 			char += 1
 		return word
 
-	def _getIsWord( self, word: str | Enum ) -> bool:
-		""" Check if the next word is the give word """
+	def _getIsWord( self, word: str | Enum, ignoreSpace: bool = False ) -> bool:
+		""" Check if the next word is the given word """
 		if isinstance( word, Enum ):
 			word = word.value
-
-		if self.line[ self.char : self.char + len( word ) ] == word:
-			self.char += len( word )
+		# remove space
+		offset = self._peek(0) == ' ' and ignoreSpace
+		# check if it's the right word
+		if self.line[ self.char + offset : self.char + offset + len( word ) ] == word:
+			self.char += len( word ) + offset
 			return True
 		return False
+
+	def _getIsWords( self, *words: str, ignoreSpace: bool = False ) -> str:
+		"""
+		Check if the next word is one of the given words
+		:returns: the word the was found or empty str
+		"""
+		# remove space
+		offset = self._peek(0) == ' ' and ignoreSpace
+		for word in words:
+			if self.line[ self.char + offset: self.char + offset + len( word ) ] == word:
+				self.char += len( word ) + offset
+				return word
+		return ''
 
 	def _assertIsKw( self, kw: Keyword | Symbol, curr: Keyword | Symbol, loc: Loc, offset: int = 0 ) -> None:
 		"""
@@ -453,7 +470,7 @@ class Tokenizer:
 		"""
 		lineNum, col = lineNum or self.lineN,  col or self.char
 		if config.logStyle.fancy():
-			err = f'at line {lineNum + 1} in file {self._getFile()}: {message.format( line=lineNum + 1, char=col )}\n'
+			err = f'at line {lineNum + 1} and column {col} in file {self._getFile()}: {message.format( line=lineNum + 1, char=col )}\n'
 		else:
 			err = f'{self._getFile()}:{lineNum + 1}:{col}: {message.format( line=lineNum + 1, char=col )}\n'
 		err += self.lines[ lineNum ].removesuffix('\n') + '\n'
