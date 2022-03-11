@@ -1,7 +1,7 @@
 |* 10/03/2022 embedding ASM inside code files example by ENDERZOMBI102
 *|
 DCLAR SUBROUTIN main{StRiNg() argv______} <- InTgR [
-     |* ASM blocks can contain "e", but they can't be bigger than 4 lines
+     |* ASM blocks can contain "e", but they can't be bigger than 4 lines.
      * ASM blocks must have a backend associated with them,
      * and will only be compiled if the specified backend is the same as the compiling one.
      * NOTE: Interpreter doesn't support any asm block, so it will be ignored
