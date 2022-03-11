@@ -10,7 +10,6 @@ DCLAR SUBROUTIN main{StRiNg() argv______} <- InTgR [
          LOAD_GLOBAL	0 (print)
          LOAD_CONST     1 ('hello world!')
          CALL_FUNCTION  1
-         RETURN_VALUE
      ]/
 
      DCLAR SCTION ASM{ JAVASCRIPT } [
