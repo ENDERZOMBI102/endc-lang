@@ -1,9 +1,12 @@
 |* 10/03/2022 embedding ASM inside code files example by ENDERZOMBI102
 *|
 DCLAR SUBROUTIN main{StRiNg() argv______} <- InTgR [
-     |* ASM blocks can contain "e", but they can't be bigger than 4 lines, including declaration and ]
+     |* ASM blocks can contain "e", but they can't be bigger than 4 lines
      *|
      DCLAR SCTION ASM{ PYTHON } [
-		print('hello world!')
+         LOAD_GLOBAL	0 (print)
+         LOAD_CONST     1 ('hello world!')
+         CALL_FUNCTION  1
+         RETURN_VALUE
      ]/
 ]
