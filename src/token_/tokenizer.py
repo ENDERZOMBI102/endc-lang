@@ -233,31 +233,33 @@ class Tokenizer:
 				if self.code[-1].value is not Keyword.DECLARE:
 					self._fatal( 'Missing DECLARE keyword before SECTION keyword.' )
 
-				if not self._getIsWord( Keyword.ASM ):
+				if not self._getIsWord( Keyword.ASM, ignoreSpace=True ):
 					self._fatal( 'Missing ASM keyword after SECTION declaration.' )
-				if not self._getIsWord( Symbol.LBRACE ):  # TODO: make it handle PYTHON} case
+				if not self._getIsWord( Symbol.LBRACE, ignoreSpace=True ):  # TODO: make it handle PYTHON} case
 					self._fatal( 'Missing LBRACE symbol after ASM keyword.' )
-				if backend := self._getIsWords( 'DOTNET', 'LLVM', 'WASM', 'NEKO', 'HASHLINK', 'JVM', 'PYTHON', 'JAVASCRIPT' ):
+				if ( backend := self._getIsWords( 'DOTNET', 'LLVM', 'WASM', 'NEKO', 'HASHLINK', 'JVM', 'PYTHON', 'JAVASCRIPT', ignoreSpace=True ) ) == '':
 					self._fatal( f'Invalid ASM target "{self._peekWord().removesuffix("}")}" found, aborting.' )
-				if not self._getIsWord( Symbol.RBRACE ):
+				if not self._getIsWord( Symbol.RBRACE, ignoreSpace=True ):
 					self._fatal( f'Missing RBRACE symbol after {backend} keyword.' )
-				if not self._getIsWord( Symbol.LBRACK ):
+				if not self._getIsWord( Symbol.LBRACK, ignoreSpace=True ):
 					self._fatal( 'Missing LBRACK symbol after RBRACE symbol.' )
 
 				# get all code in the next two lines
 				asmCode = ''
 				line = 0
-				while ( val := self._peek() ) != ']' and line > 4:
+				while ( val := self._peek(0) ) != ']' and line <= 4:
 					if val == '\n':
 						line += 1
 						self.lineN += 1
 						self.char = 0
-					asmCode += val
-					self.char += 1
+						self.line = self.lines[ self.lineN ]
+						asmCode += '\n'
+					else:
+						asmCode += self._getChar()
 
 				self.code += [
 					Token( TokenType.ASM, Keyword[backend], Loc.create( self, backend ) ),
-					Token( TokenType.ASM, asmCode, Loc.create( self, backend ) ),
+					Token( TokenType.ASM, asmCode.strip(), Loc.create( self, backend ) ),
 				]
 
 				del backend, asmCode, line, val

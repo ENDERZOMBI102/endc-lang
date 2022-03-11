@@ -125,6 +125,20 @@ parser.add_argument(
 	dest='exitAtStage'
 )
 parser.add_argument(
+	'--dump-tokens',
+	help='Dumps the tokens generated from a file to $FILENAME.tks',
+	action='store_true',
+	default=False,
+	dest='exitAtStage'
+)
+parser.add_argument(
+	'--dump-ast',
+	help='Dumps the ast generated from a file to $FILENAME.ast',
+	action='store_true',
+	default=False,
+	dest='exitAtStage'
+)
+parser.add_argument(
 	'--execpyfile',
 	help=argparse.SUPPRESS,
 	action='store',
@@ -151,6 +165,8 @@ class Arguments:
 	genConfig: bool
 	logStyle: LogStyle
 	exitAtStage: Stage
+	dumpTokens: bool
+	dumpAst: bool
 	# 0: everything 1: warns up 2: only errors
 	verboseLevel: int
 	# debug mode, enable debug logging

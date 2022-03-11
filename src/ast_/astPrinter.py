@@ -3,14 +3,19 @@ Given an AST, pretty prints it.
 """
 
 
-from typing import cast
+from typing import cast, TextIO
 
 from .expr import Visitor, Binary, Grouping, Literal, Unary, Expr
 
 
 class AstPrinter(Visitor[str]):
+	file: TextIO
+
+	def __init__( self, file: TextIO ):
+		self.file = file
+
 	def print( self, expr: Expr ) -> None:
-		print( expr.accept(self) )
+		print( expr.accept(self), file=self.file )
 
 	def parenthesize( self, name: str, *args: Expr ) -> str:
 		string: str = f'({name}'

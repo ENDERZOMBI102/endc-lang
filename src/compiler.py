@@ -18,6 +18,7 @@ from importlib import import_module
 from cli import args, LogStyle, Stage
 from backend import BACKENDS
 import ast_.parser
+import ast_.astPrinter
 import token_.tokenizer
 from log import warn, info, error
 from utils import ExitError
@@ -76,6 +77,10 @@ def main() -> int:
 		info( f'Tokenizing..')
 		tokenizer = token_.tokenizer.Tokenizer( args.file.read_text(), str( args.file ) )
 		tokenizer.tokenize()
+		if args.dumpTokens:
+			(
+				args.file.parent / f'{args.file.name.removesuffix(".endc").removesuffix(".ec")}.ast'
+			).write_text( '\n'.join( map( str, tokenizer.getTokens() ) ) )
 		if args.exitAtStage is Stage.TOKENIZATION:
 			return 0
 
@@ -84,7 +89,12 @@ def main() -> int:
 		if ast is None:
 			error( f'Failed to generate AST, aborting.' )
 			return 1
-		elif args.exitAtStage is Stage.AST:
+		if args.dumpAst:
+			astFile = args.file.parent / f'{args.file.name.removesuffix( ".endc" ).removesuffix( ".ec" )}.tks'
+			with astFile.open( 'w' ) as file:
+				ast_.astPrinter.AstPrinter( file ).print( ast )
+			del file, astFile
+		if args.exitAtStage is Stage.AST:
 			return 0
 
 		info( f'Selecting backend..')
