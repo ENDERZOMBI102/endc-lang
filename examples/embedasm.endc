@@ -6,46 +6,46 @@ DCLAR SUBROUTIN main{StRiNg() argv______} <- InTgR [
      * and will only be compiled if the specified backend is the same as the compiling one.
      * NOTE: Interpreter doesn't support any asm block, so it will be ignored
      *|
-     DCLAR SCTION ASM{ PYTHON } [
+     DCLAR SCTION ASM{ PYTHON } [[
          LOAD_GLOBAL	0 (print)
          LOAD_CONST     1 ('hello world!')
          CALL_FUNCTION  1
-     ]/
+     ]]/
 
-     DCLAR SCTION ASM{ JAVASCRIPT } [
+     DCLAR SCTION ASM{ JAVASCRIPT } [[
          console.log('hello world!')
-     ]/
+     ]]/
 
-     DCLAR SCTION ASM{ LLVM } [
+     DCLAR SCTION ASM{ LLVM } [[
          @.str = private constant [15 x i8] c"hello, world!\0A\00"
          define i32 @main() { entry: %str = getelementptr inbounds [15 x i8]* @.str, i32 0, i32 0
          %call = call i32 (i8*, ...)* @printf(i8* %str)
          ret i32 1 } declare i32 @printf(i8*, ...)
-     ]/
+     ]]/
 
-     DCLAR SCTION ASM{ DOTNET } [
+     DCLAR SCTION ASM{ DOTNET } [[
          ldstr "hello world!"
          call void [mscorlib]System.Console::WriteLine(string)
-     ]/
+     ]]/
 
-     DCLAR SCTION ASM{ WASM } [
+     DCLAR SCTION ASM{ WASM } [[
         (module (import  "console"  "log" ( func  $log ( param  i32  i32 ) ) ) ( import  "js"  "mem" (memory  1) ) (data (i32.const 0) "hello world!") (func (export  "helloWorld")
         i32.const 0
         i32.const 29
         call  $log ) )
-     ]/
+     ]]/
 
-     DCLAR SCTION ASM{ NEKO } [
+     DCLAR SCTION ASM{ NEKO } [[
         $print("hello world!");
-     ]/
+     ]]/
 
-     DCLAR SCTION ASM{ HASHLINK } [
+     DCLAR SCTION ASM{ HASHLINK } [[
          trace("hello world!");
-     ]/
+     ]]/
 
-     DCLAR SCTION ASM{ JVM } [
+     DCLAR SCTION ASM{ JVM } [[
          getstatic java/lang/System/out Ljava/io/PrintStream;
          ldc "Hello World!"
          invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V
-     ]/
+     ]]/
 ]

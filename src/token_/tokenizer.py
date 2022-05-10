@@ -18,7 +18,7 @@ __all__ = [
 	'TokenizerError'
 ]
 _HARDCORE: Final[ bool ] = False
-config: Arguments
+config: Arguments = None
 
 
 @dataclass
@@ -159,9 +159,9 @@ class Tokenizer:
 				self.code += [ Token( TokenType.KEYWORD, Keyword.SUBROUTINE, loc ) ]
 			elif self._getIsWord( Keyword.WHEN ):
 				loc = Loc.create( self, Keyword.WHEN )
-				if self.code[-1].value not in ( Keyword.UNTIL, Symbol.LBRACE.value ):
-					self._fatal( f'Missing UNTIL keyword or LBRACE symbol before WHEN keyword at {loc}' )
-				if self._peekIgnoreSpaces() not in ( Symbol.LBRACE.value, Keyword.FINISHED ):
+				if self.code[-1].value not in ( Keyword.UNTIL, Symbol.RBRACK ):
+					self._fatal( f'Missing UNTIL keyword or RBRACK symbol before WHEN keyword at {loc}' )
+				if self._peekIgnoreSpaces() != Symbol.LBRACE.value and self._peekWord() != Keyword.FINISHED.value:
 					self._fatal( f'Missing LBRACE symbol or FINISHED keyword after WHEN keyword at {loc}' )
 				self.code += [ Token( TokenType.KEYWORD, Keyword.WHEN, loc ) ]
 			elif self._getIsWord( Keyword.UNTIL ):
@@ -243,11 +243,13 @@ class Tokenizer:
 					self._fatal( f'Missing RBRACE symbol after {backend} keyword.' )
 				if not self._getIsWord( Symbol.LBRACK, ignoreSpace=True ):
 					self._fatal( 'Missing LBRACK symbol after RBRACE symbol.' )
+				if not self._getIsWord( Symbol.LBRACK, ignoreSpace=True ):
+					self._fatal( 'Missing LBRACK symbol after LBRACK symbol.' )
 
 				# get all code in the next two lines
 				asmCode = ''
 				line = 0
-				while ( val := self._peek(0) ) != ']' and line <= 4:
+				while ( ( val := self._peek(0) ) != ']' or self._peek(1) != ']' ) and line <= 4:
 					if val == '\n':
 						line += 1
 						self.lineN += 1
@@ -471,7 +473,7 @@ class Tokenizer:
 		:param col: Column where the error originated
 		"""
 		lineNum, col = lineNum or self.lineN,  col or self.char
-		if config.logStyle.fancy():
+		if config and config.logStyle.fancy():
 			err = f'at line {lineNum + 1} and column {col} in file {self._getFile()}: {message.format( line=lineNum + 1, char=col )}\n'
 		else:
 			err = f'{self._getFile()}:{lineNum + 1}:{col}: {message.format( line=lineNum + 1, char=col )}\n'

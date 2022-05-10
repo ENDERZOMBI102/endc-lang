@@ -3,7 +3,7 @@ Interpreter backend for the endc compiler.
 """
 from typing import Any, cast
 
-from ast_.expr import Visitor, Binary, Grouping, Literal, Unary, Expr
+from ast_.expr import Visitor, Binary, Grouping, Literal, Unary, Expr, R
 from backend.interpreter import errorHandler
 from token_ import UnaryType
 from utils import ExitError
@@ -15,6 +15,9 @@ class InterpreterError(RuntimeError):
 
 # noinspection PyMethodMayBeStatic
 class Interpreter(Visitor[object]):
+
+	def visitAsmLiteralExpr( self, asmliteral: 'AsmLiteral' ) -> R:
+		pass
 
 	def visitBinaryExpr( self, binary: Binary ) -> object:
 		left: Any = self.evaluate(binary.left)

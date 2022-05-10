@@ -55,7 +55,7 @@ class ExpressionTest(TestCase):
 
 	def testInterpreterWithGoodCode( self ) -> None:
 		for example in Path('examples').glob('*.endc'):
-			with self.subTest(f'Testing {example}'):
+			with self.subTest(f'file {example}'):
 				try:
 					interpreter.Interpreter().interpret(
 						parser.Parser(
