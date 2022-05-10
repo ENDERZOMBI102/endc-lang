@@ -159,8 +159,8 @@ class Tokenizer:
 				self.code += [ Token( TokenType.KEYWORD, Keyword.SUBROUTINE, loc ) ]
 			elif self._getIsWord( Keyword.WHEN ):
 				loc = Loc.create( self, Keyword.WHEN )
-				if self.code[-1].value not in ( Keyword.UNTIL, Symbol.RBRACK ):
-					self._fatal( f'Missing UNTIL keyword or RBRACK symbol before WHEN keyword at {loc}' )
+				if self.code[-1].value not in ( Keyword.UNTIL, Symbol.RBRACE, Symbol.RBRACK ):
+					self._fatal( f'Missing UNTIL keyword or LBRACE symbol or RBRACK symbol before WHEN keyword at {loc}' )
 				if self._peekIgnoreSpaces() != Symbol.LBRACE.value and self._peekWord() != Keyword.FINISHED.value:
 					self._fatal( f'Missing LBRACE symbol or FINISHED keyword after WHEN keyword at {loc}' )
 				self.code += [ Token( TokenType.KEYWORD, Keyword.WHEN, loc ) ]
