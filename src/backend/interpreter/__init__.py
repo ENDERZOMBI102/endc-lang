@@ -106,15 +106,11 @@ class Interpreter(Visitor[object]):
 
 		return str(obj)
 
-	def interpret( self, expr: Expr ) -> None:
+	def interpret( self, expr: Expr ) -> object:
 		try:
-			obj = self.evaluate( expr )
-			print( self.stringify(obj) )
+			return self.evaluate( expr )
 		except InterpreterError as e:
-			raise ExitError(
-				-1,
-				f'Implementation error: {errorHandler.getTracebackText(e)}'
-			)
+			raise ExitError( -1, f'Implementation error: {errorHandler.getTracebackText(e)}' )
 
 
 def backendMain(ast: Expr) -> int:

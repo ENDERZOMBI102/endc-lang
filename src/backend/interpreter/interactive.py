@@ -5,14 +5,14 @@ Interactive intepreter implementation.
 from sys import stderr
 
 import ast_.parser
-import tokenizer
+import token_.tokenizer
 from cli import args
 from log import error
 from . import Interpreter, InterpreterError, errorHandler
 
 
 def interactiveMain() -> int:
-	intpr = Interpreter()
+	interpreter = Interpreter()
 	while True:
 		inp: str
 		try:
@@ -38,15 +38,11 @@ def interactiveMain() -> int:
 		else:
 			# its not, interpret it
 			try:
-				intpr.interpret(
-					ast_.parser.Parser(
-						tokenizer.parse(
-							inp,
-							'<stdin>'
-						)
-					).parse()  # type: ignore
-				)
-			except tokenizer.TokenizerError as e:
+				tokens = token_.tokenizer.Tokenizer( inp, '<stdin>' ).tokenize().getTokens()
+				ast = ast_.parser.Parser( tokens ).parse()
+				if ( val := interpreter.interpret( ast ) ) is not None:
+					print( val )
+			except token_.tokenizer.TokenizerError as e:
 				error( f'Failed to tokenize expression: {e.args[0]}' )
 			except ast_.parser.ParseError as e:
 				error( f'Failed to parse expression: "{e.args[0]}"' )

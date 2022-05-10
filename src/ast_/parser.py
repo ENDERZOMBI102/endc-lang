@@ -9,34 +9,25 @@ from ast_.expr import Expr, Binary, Unary, Literal, Grouping
 from cli import Arguments
 from token_ import Token, Keyword, TokenType, UnaryType, Loc, Symbol
 
-hadError: bool = False
+
+Error = tuple[int, str, str]
 config: Arguments
 
 
-def report(line: int, where: str, message: str) -> None:
-	global hadError
-	print( f'[line {line}] Error {where}: {message}' )
-	hadError = True
-
-
-def error(token: Token, message: str) -> None:
-	if token.typ == TokenType.EOF:
-		report( token.loc[1], 'at end', message )
-	else:
-		report( token.loc[1], f"at '{token.value}'", message )
-
-
 class Parser:
+	errors: list[Error]
 	tokens: Final[ list[Token] ]
 	current: int = 0
 
 	def __init__(self, tokens: list[Token]) -> None:
 		self.tokens = tokens + [ Token(TokenType.EOF, '', Loc('', 0, 0) ) ]
+		self.errors = []
 
 	def parse( self ) -> Optional[Expr]:
 		try:
+			self.errors.clear()
 			return self.expression()
-		except ParseError:
+		except ParseError as e:
 			return None
 
 	def expression( self ) -> Expr:
@@ -116,8 +107,17 @@ class Parser:
 		raise self.error( self.peek(), message )
 
 	def error( self, token: Token, message: str ) -> ParseError:
-		error( token, message )
+		self.errors.append(
+			(
+				token.loc[1],
+				'at end' if token.typ == TokenType.EOF else f"at '{token.value}'",
+				message
+			)
+		)
 		return ParseError()
+
+	def hadErrors( self ) -> bool:
+		return len( self.errors ) != 0
 
 	def syncronize( self ) -> None:
 		self.advance()

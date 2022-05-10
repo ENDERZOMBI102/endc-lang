@@ -18,7 +18,7 @@ __all__ = [
 	'TokenizerError'
 ]
 _HARDCORE: Final[ bool ] = False
-config: Arguments = None
+config: Arguments | None = None
 
 
 @dataclass
@@ -344,7 +344,7 @@ class Tokenizer:
 					del spaceCount
 			elif self._getIsWord( '\0' ) or ( self.char == len( self.line ) and self.lineN == len( self.lines ) - 1 ):
 				break
-			elif self._peek( 0 ) in ',1234567890' and self._peek() in '0123456789':
+			elif self._peek(0) in '1234567890' or ( self._peek(0) == ',' and self._peek(1) in '0123456789' ):
 				num = ''
 				while self._peek( 0 ) in ',1234567890':
 					if ( numChar := self._getChar() ) != '\0':
@@ -484,7 +484,6 @@ class Tokenizer:
 
 if __name__ == '__main__':
 	from time import time
-	from pathlib import Path
 	from pprint import pprint
 	from sys import argv, stderr
 

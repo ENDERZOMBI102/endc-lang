@@ -15,22 +15,22 @@ class ExpressionTest(TestCase):
 	def testTokenizerWithBadCode( self ) -> None:
 		# one line comments
 		with self.assertRaises( tokenizer.TokenizerError ):
-			tokenizer.Tokenizer( '|* comment test *|', '<test>' ).tokenize().getTokens()
+			tokenizer.Tokenizer( '|* comment test *|', '<test>' ).tokenize()
 		# FUNC without DCLAR or CALL
 		with self.assertRaises( tokenizer.TokenizerError ):
-			tokenizer.Tokenizer( 'SUBROUTIN', '<test>' ).tokenize().getTokens()
+			tokenizer.Tokenizer( 'SUBROUTIN', '<test>' ).tokenize()
 		# unfinished string
 		with self.assertRaises( tokenizer.TokenizerError ):
-			tokenizer.Tokenizer( '*/\n', '<test>' ).tokenize().getTokens()
+			tokenizer.Tokenizer( '*/\n', '<test>' ).tokenize()
 		# CONSTANT without DCLAR
 		with self.assertRaises( tokenizer.TokenizerError ):
-			tokenizer.Tokenizer( 'CONSTANT', '<test>' ).tokenize().getTokens()
+			tokenizer.Tokenizer( 'CONSTANT', '<test>' ).tokenize()
 		# BACK without GIV
 		with self.assertRaises( tokenizer.TokenizerError ):
-			tokenizer.Tokenizer( 'BACK', '<test>' ).tokenize().getTokens()
+			tokenizer.Tokenizer( 'BACK', '<test>' ).tokenize()
 		# line without /
 		with self.assertRaises( tokenizer.TokenizerError ):
-			tokenizer.Tokenizer( 'GIV BACK 0', '<test>' ).tokenize().getTokens()
+			tokenizer.Tokenizer( 'GIV BACK 0', '<test>' ).tokenize()
 
 	def testTokenizerWithGoodCode( self ) -> None:
 		for example in Path('examples').glob('*.endc'):
