@@ -22,7 +22,7 @@ def interactiveMain() -> int:
 		# as we're in the interactive interpreter, we can be a little more forgiving
 		if not inp.endswith('/'):
 			inp += '/'
-		# is it a exit call?
+		# is it an exit call?
 		if inp.startswith('CALL xit{'):
 			if inp.endswith('}/'):
 				# parse exit code
@@ -36,7 +36,7 @@ def interactiveMain() -> int:
 			else:
 				print( 'missing / at end of input', file=stderr )
 		else:
-			# its not, interpret it
+			# it's not, interpret it
 			try:
 				tokens = token_.tokenizer.Tokenizer( inp, '<stdin>' ).tokenize().getTokens()
 				ast = ast_.parser.Parser( tokens ).parse()
