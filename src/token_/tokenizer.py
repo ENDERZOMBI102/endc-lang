@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Optional, Final
 from pathlib import Path
+import string as strmod
 
 from cli import Arguments
 from token_ import Token, Symbol, TokenType, Keyword, Loc, UnaryType
@@ -33,7 +34,7 @@ class Tokenizer:
 	lineN: int = 0
 	char: int = 0
 	num: str = ''
-	file: Path
+	file: str
 	line: str
 
 	def __init__( self, codeString: str, file: str ) -> None:
@@ -42,7 +43,7 @@ class Tokenizer:
 		:param file: original file
 		"""
 		self.lines = codeString.splitlines( True )
-		self.file = Path( file )
+		self.file = file
 		self.code = []
 
 	def tokenize( self ) -> Tokenizer:
@@ -363,6 +364,8 @@ class Tokenizer:
 					Token( TokenType.SYMBOL, Symbol.COMMA, Loc.create( self, Symbol.COMMA ) )
 				]
 			else:
+				if self._peek(0) in strmod.punctuation:
+					self._fatal( 'Invalid character in name', None, self.char + 1 )
 				name: str = ''
 				while self._peek( 0 ) not in ( ' ', '\n', '{', '(', '[', ']', ')', '}', '.', '\0', '/' ):
 					name += self._getChar()
@@ -387,7 +390,7 @@ class Tokenizer:
 	# PRIVATE METHODS
 
 	def _getFile( self ) -> str:
-		return './' + str( self.file ).replace('\\', '/')
+		return self.file
 
 	def _getChar( self ) -> str:
 		""" Returns and consume a char """
@@ -487,8 +490,6 @@ if __name__ == '__main__':
 	from pprint import pprint
 	from sys import argv, stderr
 
-	from utils import ExitError
-
 	start = time()
 	exitCode = 0
 	try:
@@ -498,8 +499,6 @@ if __name__ == '__main__':
 				argv[1]
 			).tokenize().getTokens()
 		)
-	except ExitError as e:
-		exitCode = e.code
 	except TokenizerError as e:
 		print( e.message, file=stderr )
 

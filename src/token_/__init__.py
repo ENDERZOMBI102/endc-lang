@@ -82,6 +82,8 @@ class Symbol(Enum):
 	RBRACK = ']'
 	LBRACE = '{'
 	RBRACE = '}'
+	BLOCK_OPEN = '$['
+	BLOCK_CLOSE = ']$'
 	SLASH = '/'
 	COLON = ':'
 	COMMA = ','
@@ -98,6 +100,7 @@ class Symbol(Enum):
 	ARROWR = '->'
 
 
+# noinspection PyArgumentList
 class UnaryType(Enum):
 	SUBTRACT = auto()		# +
 	ADD = auto()  			# -
@@ -109,6 +112,7 @@ class UnaryType(Enum):
 	BANG_IS = auto()		# !IS
 
 
+# noinspection PyArgumentList
 class TokenType(Enum):
 	NAME = auto()
 	FLOAT = auto()

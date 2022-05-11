@@ -43,12 +43,12 @@ def interactiveMain() -> int:
 				if ( val := interpreter.interpret( ast ) ) is not None:
 					print( val )
 			except token_.tokenizer.TokenizerError as e:
-				error( f'Failed to tokenize expression: {e.args[0]}' )
+				error( 'Failed to tokenize expression:\n\t{0}', *e.args )
 			except ast_.parser.ParseError as e:
-				error( f'Failed to parse expression: "{e.args[0]}"' )
+				error( 'Failed to parse expression:\n\t{0}', *e.args )
 			except InterpreterError as e:
-				error( f'Interpreter error: {e.args[0]}: {e.args[1]}' )
+				error( 'Interpreter error:\n\t{0}: {1}', *e.args )
 			except Exception as e:
-				error( f'Implementation error: {errorHandler.getTracebackText(e)}' )
+				error( 'Implementation error:\n\t{}', errorHandler.getTracebackText(e) )
 				if args.exitOnImplementationError:
 					return -1

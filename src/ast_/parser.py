@@ -24,11 +24,11 @@ class Parser:
 		self.errors = []
 
 	def parse( self ) -> Optional[Expr]:
-		try:
-			self.errors.clear()
-			return self.expression()
-		except ParseError as e:
-			return None
+		self.errors.clear()
+		val = self.expression()
+		if isinstance( val, ParseError ):
+			raise ParseError( self.errors, val )
+		return val
 
 	def expression( self ) -> Expr:
 		return self.equality()
@@ -119,7 +119,7 @@ class Parser:
 	def hadErrors( self ) -> bool:
 		return len( self.errors ) != 0
 
-	def syncronize( self ) -> None:
+	def synchronize( self ) -> None:
 		self.advance()
 
 		while not self.isAtEnd():
