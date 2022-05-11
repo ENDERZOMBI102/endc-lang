@@ -1,5 +1,5 @@
 """
-Interactive intepreter implementation.
+Interactive interpreter implementation.
 """
 
 from sys import stderr
