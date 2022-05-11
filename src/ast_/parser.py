@@ -2,7 +2,7 @@
 Parsers a stream/list of tokens into an abstract binary tree, while doing an intermediate syntax check
 """
 
-from typing import Final, Union, Optional
+from typing import Final, Union, Optional, NamedTuple
 
 from ast_ import ParseError
 from ast_.expr import Expr, Binary, Unary, Literal, Grouping
@@ -10,7 +10,16 @@ from cli import Arguments
 from token_ import Token, Keyword, TokenType, UnaryType, Loc, Symbol
 
 
-Error = tuple[int, str, str]
+class Error(NamedTuple):
+	line: int
+	file: str
+	target: str
+	message: str
+
+	def __str__( self ) -> str:
+		return f"at '{self.target}' in file {self.file} and line {self.line}: {self.message}"
+
+
 config: Arguments
 
 
@@ -91,10 +100,10 @@ class Parser:
 
 		if self.match(Symbol.LBRACE):
 			expr: Expr = self.expression()
-			self.consume(Symbol.RBRACE, 'Expect } after expression.')
+			self.consume(Symbol.RBRACE, 'Expected } after expression.')
 			return Grouping(expr)
 
-		raise self.error( self.peek(), 'Expect expression.' )
+		raise self.error( self.peek(), 'Expected expression.' )
 
 	def consume( self, typ: TokenType | Keyword | UnaryType | Symbol, message: str ) -> Token:
 		if isinstance(typ, TokenType):
@@ -108,9 +117,10 @@ class Parser:
 
 	def error( self, token: Token, message: str ) -> ParseError:
 		self.errors.append(
-			(
-				token.loc[1],
-				'at end' if token.typ == TokenType.EOF else f"at '{token.value}'",
+			Error(
+				token.loc.line,
+				token.loc.file,
+				'end' if token.typ == TokenType.EOF else token.value,
 				message
 			)
 		)
