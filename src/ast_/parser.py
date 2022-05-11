@@ -114,13 +114,13 @@ class Parser:
 				message
 			)
 		)
-		return ParseError()
+		return ParseError( self.errors[-1] )
 
 	def hadErrors( self ) -> bool:
 		return len( self.errors ) != 0
 
 	def synchronize( self ) -> None:
-		self.advance()
+		self.advance()  # DCLAR SUBROUTIN func{} [ CALL PRINTTO{ STDOUT. *Hllo world!* }/ ]
 
 		while not self.isAtEnd():
 			if self.previous().value == Symbol.SLASH:
