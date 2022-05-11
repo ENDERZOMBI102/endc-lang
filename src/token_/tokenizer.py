@@ -19,6 +19,7 @@ __all__ = [
 	'TokenizerError'
 ]
 _HARDCORE: Final[ bool ] = False
+_INVALID_NAME_CHARS = ( ' ', '\n', '{', '(', '[', ']', ')', '}', '.', '\0', '/', '+', '-' )
 config: Arguments | None = None
 
 
@@ -51,8 +52,7 @@ class Tokenizer:
 		# execute until there are no more lines
 		while self.lineN < len( self.lines ):
 			self.line = self.lines[ self.lineN ]
-
-			# simple keywords
+			# region simple keywords
 			if self._getIsWord( Keyword.DECLARE ):
 				self.code += [ Token( TokenType.KEYWORD, Keyword.DECLARE, Loc.create( self, Keyword.DECLARE ) ) ]
 			elif self._getIsWord( Keyword.GIVE ):
@@ -69,15 +69,14 @@ class Tokenizer:
 				self.code += [ Token( TokenType.SYMBOL, Symbol.DOT, Loc.create( self, Symbol.DOT ) ) ]
 			elif self._getIsWord( Symbol.ADD ):
 				self.code += [ Token( TokenType.UNARY, UnaryType.ADD, Loc.create( self, Symbol.ADD ) ) ]
-			elif self._getIsWord( Symbol.SUB ):
-				self.code += [ Token( TokenType.UNARY, UnaryType.SUBTRACT, Loc.create( self, Symbol.SUB ) ) ]
 			elif self._getIsWord( Symbol.DIV ):
 				self.code += [ Token( TokenType.UNARY, UnaryType.DIVIDE, Loc.create( self, Symbol.DIV ) ) ]
 			elif self._getIsWord( Symbol.MODULO ):
 				self.code += [ Token( TokenType.UNARY, UnaryType.MODULO, Loc.create( self, Symbol.MODULO ) ) ]
 			elif self._getIsWord( Symbol.GREATER ):
 				self.code += [ Token( TokenType.UNARY, UnaryType.GREATER, Loc.create( self, Symbol.GREATER ) ) ]
-			# keywords with prefix needed
+			# endregion
+			# region prefixed keywords
 			elif self._getIsWord( Keyword.CONSTANT ):
 				loc = Loc.create( self, Keyword.VARIABLE )
 				self._assertIsKw( Keyword.DECLARE, Keyword.CONSTANT, loc )
@@ -114,22 +113,8 @@ class Tokenizer:
 				loc = Loc.create( self, Symbol.ARROWL )
 				self._assertIsKw( Symbol.RBRACE, Symbol.ARROWL, loc )
 				self.code += [ Token( TokenType.SYMBOL, Symbol.ARROWL, loc ) ]
-			elif self._getIsWord( Symbol.EQUAL ):
-				if self._getIsWord('<'):
-					self.code += [
-						Token( TokenType.UNARY, UnaryType.GREATER_EQUAL, Loc.create( self, Symbol.EQUAL ) )
-					]
-				else:
-					loc = Loc.create( self, Symbol.EQUAL )
-					if self.code[-1].typ != TokenType.NAME:
-						raise self._fatal( f'Missing NAME before = symbol at {loc}' )
-					self.code += [ Token( TokenType.SYMBOL, Symbol.EQUAL, loc ) ]
-			elif self._getIsWord( Keyword.IS ):
-				loc = Loc.create( self, Keyword.IS )
-				if self.code[-1].typ != TokenType.NAME:
-					raise self._fatal( f'Missing NAME before IS keyword at {loc}' )
-				self.code += [ Token( TokenType.KEYWORD, Keyword.IS, loc ) ]
-			# parens
+			# endregion
+			# region parens
 			elif self._getIsWord(Symbol.LBRACK):
 				self.code += [ Token( TokenType.SYMBOL, Symbol.LBRACK, Loc.create( self, Symbol.LBRACK ) ) ]
 			elif self._getIsWord(Symbol.RBRACK):
@@ -144,8 +129,28 @@ class Tokenizer:
 				self.code += [ Token( TokenType.SYMBOL, Symbol.RPAREN, Loc.create( self, Symbol.RPAREN ) ) ]
 			elif self._getIsWord(Symbol.SLASH):
 				self.code += [ Token( TokenType.SYMBOL, Symbol.SLASH, Loc.create( self, Symbol.SLASH ) ) ]
-
-			# special keywords
+			# endregion
+			# region checked keywords
+			elif self._getIsWord( Symbol.SUB ):
+				if self._getIsWord( Symbol.SUB ):
+					if self.code[-1].typ != TokenType.NAME:
+						raise self._fatal( f'Invalid token before RANDOMIZE symbol at {Loc.create( self, Symbol.RANDOMIZE )}' )
+					self.code += [ Token( TokenType.UNARY, UnaryType.RANDOMIZE, Loc.create( self, Symbol.RANDOMIZE ) ) ]
+				else:
+					self.code += [ Token( TokenType.UNARY, UnaryType.SUBTRACT, Loc.create( self, Symbol.SUB ) ) ]
+			elif self._getIsWord( Symbol.EQUAL ):
+				if self._getIsWord('<'):
+					self.code += [ Token( TokenType.UNARY, UnaryType.GREATER_EQUAL, Loc.create( self, Symbol.EQUAL ) ) ]
+				else:
+					loc = Loc.create( self, Symbol.EQUAL )
+					if self.code[-1].typ != TokenType.NAME:
+						raise self._fatal( f'Missing NAME before = symbol at {loc}' )
+					self.code += [ Token( TokenType.SYMBOL, Symbol.EQUAL, loc ) ]
+			elif self._getIsWord( Keyword.IS ):
+				loc = Loc.create( self, Keyword.IS )
+				if self.code[-1].typ != TokenType.NAME:
+					raise self._fatal( f'Missing NAME before IS keyword at {loc}' )
+				self.code += [ Token( TokenType.KEYWORD, Keyword.IS, loc ) ]
 			elif self._getIsWord( Keyword.ELSE ):
 				loc = Loc.create( self, Keyword.ELSE )
 				if self.code[-1].value != Symbol.RBRACK:
@@ -183,12 +188,13 @@ class Tokenizer:
 				if self._peekIgnoreSpaces() != Symbol.LBRACK.value:
 					raise self._fatal( f'Missing LBRACK symbol after DO keyword at {loc}' )
 				self.code += [ Token( TokenType.KEYWORD, Keyword.DO, loc ) ]
-			elif self._peek(0) == '!':
-				self._getChar()
-				if self._getIsWord('IS'):
-					self.code += [ Token( TokenType.UNARY, UnaryType.BANG_IS, Loc.create( self, '!IS' ) ) ]
+			elif self._getIsWord( Symbol.BANG ):
+				if self._getIsWord( Keyword.IS ):
+					self.code += [ Token( TokenType.UNARY, UnaryType.BANG_IS, Loc.create( self, 'ඞIS' ) ) ]
 				else:
-					self.code += [ Token( TokenType.UNARY, UnaryType.BANG, Loc.create( self, '!' ) ) ]
+					self.code += [ Token( TokenType.UNARY, UnaryType.BANG, Loc.create( self, 'ඞ' ) ) ]
+			# endregion
+			# region heavily checked keywords
 			elif self._getIsWord( Keyword.FROM ):
 				loc = Loc.create( self, Keyword.FROM )
 				offset = -1
@@ -266,6 +272,8 @@ class Tokenizer:
 				]
 
 				del backend, asmCode, line, val
+			# endregion
+			# region multilines
 			elif self._getIsWord( '|*' ):
 				startLine: int = self.lineN
 				found = False
@@ -319,7 +327,8 @@ class Tokenizer:
 				self.char += 1
 				self.code += [ Token( TokenType.STR, string, Loc.create( self, string ) ) ]
 				del string
-			# special stuff
+			# endregion
+			# region whitespace
 			elif self._getIsWord( ' ' ):
 				pass
 			elif self._getIsWord( '\t' ):
@@ -345,6 +354,8 @@ class Tokenizer:
 					del spaceCount
 			elif self._getIsWord( '\0' ) or ( self.char == len( self.line ) and self.lineN == len( self.lines ) - 1 ):
 				break
+			# endregion
+			# region literals
 			elif self._peek(0) in '1234567890' or ( self._peek(0) == ',' and self._peek(1) in '0123456789' ):
 				num = ''
 				while self._peek( 0 ) in ',1234567890':
@@ -367,7 +378,7 @@ class Tokenizer:
 				if self._peek(0) in strmod.punctuation:
 					raise self._fatal( 'Invalid character in name', None, self.char + 1 )
 				name: str = ''
-				while self._peek( 0 ) not in ( ' ', '\n', '{', '(', '[', ']', ')', '}', '.', '\0', '/' ):
+				while self._peek( 0 ) not in _INVALID_NAME_CHARS:
 					name += self._getChar()
 				if 'e' in name.lower() and ( self.code[ -1 ].typ != TokenType.KEYWORD or self.code[ -1 ].value != Keyword.FROM ):
 					raise self._fatal(
@@ -377,7 +388,7 @@ class Tokenizer:
 					)
 				self.code += [ Token( TokenType.NAME, name, Loc.create( self, name ) ) ]
 				del name
-
+				# endregion
 		return self
 
 	def getTokens( self ) -> list[Token]:

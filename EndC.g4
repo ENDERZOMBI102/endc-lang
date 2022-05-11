@@ -38,8 +38,8 @@ template_deinitializer
 	;
 
 vardef
-	:	DECLARE CONSTANT type IDENTIFIER '=' expr '/'					# DeclareConstant
-	|	DECLARE VARIABLE type IDENTIFIER ( '=' expr )? '/'				# DeclareVariable
+	:	DECLARE CONSTANT type IDENTIFIER ( ( '=' expr ) | ( '++' ) ) '/'		# DeclareConstant
+	|	DECLARE VARIABLE type IDENTIFIER ( ( '=' expr ) | ( '++' ) )? '/'		# DeclareVariable
 	;
 
 // ARGUMENTS
@@ -81,6 +81,7 @@ expr
 	:	expr operator expr									# Op
 	|	ADD expr											# Negate
 	|	BANG expr											# Not
+	|	qualified_name RANDOMIZE							# Randomize
 	|	call_expr											# Call
 	|	qualified_name '(' expr ')'							# Index
 	|	'{' expr '}'										# Parens
@@ -151,6 +152,7 @@ BANG : 'ඞ' ;
 DIV : ';' ;
 ADD : '-' ;
 MODULO : ';' ;  // greek question mark
+RANDOMIZE : '++' ;
 GT : '<' ;
 GE : '=<' ;
 DOT : '.' ;

@@ -98,6 +98,7 @@ class Symbol(Enum):
 	DOT = '.'
 	ARROWL = '<-'
 	ARROWR = '->'
+	RANDOMIZE = '++'
 
 
 # noinspection PyArgumentList
@@ -106,10 +107,11 @@ class UnaryType(Enum):
 	ADD = auto()  			# -
 	DIVIDE = auto()			# ;
 	MODULO = auto()			# \
-	BANG = auto()			# !
+	BANG = auto()			# ඞ
 	GREATER = auto()		# <
 	GREATER_EQUAL = auto()  # =<
-	BANG_IS = auto()		# !IS
+	BANG_IS = auto()		# ඞIS
+	RANDOMIZE = auto()		# ++
 
 
 # noinspection PyArgumentList
