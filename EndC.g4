@@ -127,7 +127,9 @@ operator : SUB|DIV|ADD|MODULO|GT|GE|IS|OR|AND|ARROWR ; // no implicit precedence
 
 backends : DOTNET|LLVM|WASM|NEKO|HASHLINK|JVM|PYTHON|JAVASCRIPT ;
 
-asm_block : '[' (.^\])*? ']' ;
+asm_block
+	: '[[' ( ~( ']]' ) NEWLINE? )* ']]'						# AsmBlockSpec
+	;
 
 
 // SYMBOLS
@@ -137,6 +139,10 @@ LBRACK : '[' ;
 RBRACK : ']' ;
 LBRACE : '{' ;
 RBRACE : '}' ;
+BLOCK_OPEN : '$[' ;
+BLOCK_CLOSE : ']$' ;
+ASM_BLOCK_OPEN : '[[' ;
+ASM_BLOCK_CLOSE : ']]' ;
 COLON : ':' ;
 COMMA : ',' ;
 EQUAL : '=' ;

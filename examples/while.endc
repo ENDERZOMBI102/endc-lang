@@ -3,7 +3,7 @@
 DCLAR SUBROUTIN main{StRiNg() argv______} <- InTgR [
      |* while
      *|
-     CHCK UNTIL { !NO } DO [
+     CHCK UNTIL { ඞNO } DO [
 
      ] WHN FINISHD DO [
 
@@ -12,7 +12,7 @@ DCLAR SUBROUTIN main{StRiNg() argv______} <- InTgR [
      *|
      DO [
 
-     ] UNTIL WHN { !NO } WHN FINISHD DO [
+     ] UNTIL WHN { ඞNO } WHN FINISHD DO [
 
      ]/
 ]
