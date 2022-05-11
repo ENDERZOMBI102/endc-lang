@@ -7,6 +7,6 @@ EndLang:
   - Attribute Accessor: '->'
   - Number separator: '.'
   - Equality: 'IS'
-  - Inequality: '!IS'
+  - Inequality: 'ඞIS'
   - Significant Whitespace ( no tabs )
   - single line comment is by having indentation of spaces % 2 == 1
