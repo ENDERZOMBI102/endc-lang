@@ -1,6 +1,6 @@
 EndC
 -
-A compiled/interpreted esoteric language with nothing to do with C
+A turing-complete, compiled/interpreted esoteric language with nothing to do with C if not the name
 End C was designed to be hard to code in, it achieves that by trashing everything knowledge you might have from other languages.
 
 NOTE: Not everything in here is completed! this is heavily WIP!
