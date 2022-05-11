@@ -122,12 +122,12 @@ class Tokenizer:
 				else:
 					loc = Loc.create( self, Symbol.EQUAL )
 					if self.code[-1].typ != TokenType.NAME:
-						self._fatal( f'Missing NAME before = symbol at {loc}' )
+						raise self._fatal( f'Missing NAME before = symbol at {loc}' )
 					self.code += [ Token( TokenType.SYMBOL, Symbol.EQUAL, loc ) ]
 			elif self._getIsWord( Keyword.IS ):
 				loc = Loc.create( self, Keyword.IS )
 				if self.code[-1].typ != TokenType.NAME:
-					self._fatal( f'Missing NAME before IS keyword at {loc}' )
+					raise self._fatal( f'Missing NAME before IS keyword at {loc}' )
 				self.code += [ Token( TokenType.KEYWORD, Keyword.IS, loc ) ]
 			# parens
 			elif self._getIsWord(Symbol.LBRACK):
@@ -149,39 +149,39 @@ class Tokenizer:
 			elif self._getIsWord( Keyword.ELSE ):
 				loc = Loc.create( self, Keyword.ELSE )
 				if self.code[-1].value != Symbol.RBRACK:
-					self._fatal( f'Missing RBRACK symbol before LS keyword at {loc}' )
+					raise self._fatal( f'Missing RBRACK symbol before LS keyword at {loc}' )
 				if self._peekWord() != Keyword.DO.value:
-					self._fatal( f'Missing DO symbol after LS keyword at {loc}' )
+					raise self._fatal( f'Missing DO symbol after LS keyword at {loc}' )
 				self.code += [ Token( TokenType.KEYWORD, Keyword.ELSE, loc ) ]
 			elif self._getIsWord( Keyword.SUBROUTINE ):
 				loc = Loc.create( self, Keyword.SUBROUTINE )
 				if len( self.code ) == 0 or self.code[-1].value not in ( Keyword.DECLARE, Keyword.CALL ):
-					self._fatal( f'Missing DECLARE or CALL keyword before SUBROUTINE keyword at {loc}' )
+					raise self._fatal( f'Missing DECLARE or CALL keyword before SUBROUTINE keyword at {loc}' )
 				self.code += [ Token( TokenType.KEYWORD, Keyword.SUBROUTINE, loc ) ]
 			elif self._getIsWord( Keyword.WHEN ):
 				loc = Loc.create( self, Keyword.WHEN )
 				if self.code[-1].value not in ( Keyword.UNTIL, Symbol.RBRACE, Symbol.RBRACK ):
-					self._fatal( f'Missing UNTIL keyword or LBRACE symbol or RBRACK symbol before WHEN keyword at {loc}' )
+					raise self._fatal( f'Missing UNTIL keyword or LBRACE symbol or RBRACK symbol before WHEN keyword at {loc}' )
 				if self._peekIgnoreSpaces() != Symbol.LBRACE.value and self._peekWord() != Keyword.FINISHED.value:
-					self._fatal( f'Missing LBRACE symbol or FINISHED keyword after WHEN keyword at {loc}' )
+					raise self._fatal( f'Missing LBRACE symbol or FINISHED keyword after WHEN keyword at {loc}' )
 				self.code += [ Token( TokenType.KEYWORD, Keyword.WHEN, loc ) ]
 			elif self._getIsWord( Keyword.UNTIL ):
 				loc = Loc.create( self, Keyword.UNTIL )
 				# ] UNTIL WHN {  }
 				if self.code[-1].value == Symbol.RBRACK:
 					if self._peekWord() != 'WHN':
-						self._fatal( f'Missing WHN keyword after UNTIL keyword at {loc}' )
+						raise self._fatal( f'Missing WHN keyword after UNTIL keyword at {loc}' )
 				# CHCK UNTIL {} DO [
 				elif self.code[-1].value == Keyword.CHECK:
 					if self._peekIgnoreSpaces() != Symbol.LBRACE.value:
-						self._fatal( f'Missing LBRACE symbol after UNTIL keyword at {loc}' )
+						raise self._fatal( f'Missing LBRACE symbol after UNTIL keyword at {loc}' )
 				else:
-					self._fatal( f'Missing RBRACK symbol or CHECK keyword before UNTIL keyword at {loc}' )
+					raise self._fatal( f'Missing RBRACK symbol or CHECK keyword before UNTIL keyword at {loc}' )
 				self.code += [ Token( TokenType.KEYWORD, Keyword.UNTIL, loc ) ]
 			elif self._getIsWord( Keyword.DO ):
 				loc = Loc.create( self, Keyword.DO )
 				if self._peekIgnoreSpaces() != Symbol.LBRACK.value:
-					self._fatal( f'Missing LBRACK symbol after DO keyword at {loc}' )
+					raise self._fatal( f'Missing LBRACK symbol after DO keyword at {loc}' )
 				self.code += [ Token( TokenType.KEYWORD, Keyword.DO, loc ) ]
 			elif self._peek(0) == '!':
 				self._getChar()
@@ -199,7 +199,7 @@ class Tokenizer:
 					match self.code[offset]:
 						case Token( value=Keyword.OWN ) as found:
 							if expect == NAME:
-								self._fatal(
+								raise self._fatal(
 									f'Expected NAMEs between OWN and FROM found nothing',
 									found.loc.line,
 									found.loc.char
@@ -207,7 +207,7 @@ class Tokenizer:
 							break
 						case Token( typ=TokenType.NAME ) as found:
 							if expect == OWN_OR_DOT:
-								self._fatal(
+								raise self._fatal(
 									f'Expected DOT symbol or OWN keyword before NAME found NAME',
 									found.loc.line,
 									found.loc.char
@@ -215,14 +215,14 @@ class Tokenizer:
 							expect = OWN_OR_DOT
 						case Token( value=Symbol.DOT ) as found:
 							if expect == NAME:
-								self._fatal(
+								raise self._fatal(
 									f'Expected NAMEs between OWN and FROM found nothing',
 									found.loc.line,
 									found.loc.char
 								)
 							expect = NAME
 						case found:
-							self._fatal(
+							raise self._fatal(
 								f'Invalid token found in import statement, expected NAME or OWN found {self.code[offset].typ} at {self.code[offset].loc}',
 								found.loc.line,
 								found.loc.char
@@ -232,20 +232,20 @@ class Tokenizer:
 				del offset, OWN_OR_DOT, NAME, expect
 			elif self._getIsWord( Keyword.SECTION ):
 				if self.code[-1].value is not Keyword.DECLARE:
-					self._fatal( 'Missing DECLARE keyword before SECTION keyword.' )
+					raise self._fatal( 'Missing DECLARE keyword before SECTION keyword.' )
 
 				if not self._getIsWord( Keyword.ASM, ignoreSpace=True ):
-					self._fatal( 'Missing ASM keyword after SECTION declaration.' )
+					raise self._fatal( 'Missing ASM keyword after SECTION declaration.' )
 				if not self._getIsWord( Symbol.LBRACE, ignoreSpace=True ):  # TODO: make it handle PYTHON} case
-					self._fatal( 'Missing LBRACE symbol after ASM keyword.' )
+					raise self._fatal( 'Missing LBRACE symbol after ASM keyword.' )
 				if ( backend := self._getIsWords( 'DOTNET', 'LLVM', 'WASM', 'NEKO', 'HASHLINK', 'JVM', 'PYTHON', 'JAVASCRIPT', ignoreSpace=True ) ) == '':
-					self._fatal( f'Invalid ASM target "{self._peekWord().removesuffix("}")}" found, aborting.' )
+					raise self._fatal( f'Invalid ASM target "{self._peekWord().removesuffix("}")}" found, aborting.' )
 				if not self._getIsWord( Symbol.RBRACE, ignoreSpace=True ):
-					self._fatal( f'Missing RBRACE symbol after {backend} keyword.' )
+					raise self._fatal( f'Missing RBRACE symbol after {backend} keyword.' )
 				if not self._getIsWord( Symbol.LBRACK, ignoreSpace=True ):
-					self._fatal( 'Missing LBRACK symbol after RBRACE symbol.' )
+					raise self._fatal( 'Missing LBRACK symbol after RBRACE symbol.' )
 				if not self._getIsWord( Symbol.LBRACK, ignoreSpace=True ):
-					self._fatal( 'Missing LBRACK symbol after LBRACK symbol.' )
+					raise self._fatal( 'Missing LBRACK symbol after LBRACK symbol.' )
 
 				# get all code in the next two lines
 				asmCode = ''
@@ -282,13 +282,13 @@ class Tokenizer:
 						self.lineN += 1
 				else:
 					if not found:
-						self._fatal(
+						raise self._fatal(
 							'Reached end of file, expected "*|" after comment at line {line}',
 							startLine,
 							chIndex + 1
 						)
 				if startLine == self.lineN:
-					self._fatal(
+					raise self._fatal(
 						'Comments must be at least 2 lines long. line {line}',
 						startLine,
 						chIndex + 1
@@ -304,15 +304,15 @@ class Tokenizer:
 					if self._peek( 0 ) == '*':
 						string = string[: -1 ] + self._getChar()
 					if self._peek( 0 ) == '\n':
-						self._fatal( 'Reached end of line ({line}) without closing string character "*"' )
+						raise self._fatal( 'Reached end of line ({line}) without closing string character "*"' )
 					string += self._getChar()
 				if 'e' in string and self.code[ -4 ].value != Keyword.CONSTANT:
-					self._fatal(
+					raise self._fatal(
 						'Found "e" character in non-constant string! THIS IS THE WORST POSSIBLE THING EVER!',
 						col=( self.char - len(string) ) + string.find( 'e' ) + 1
 					)
 				if 'E' in string and self.code[ -4 ].value != Keyword.CONSTANT:
-					self._fatal(
+					raise self._fatal(
 						'Found "E" character in non-constant string! THIS IS THE WORST POSSIBLE THING EVER!',
 						col=( self.char - len(string) ) + string.find( 'E' ) + 1
 					)
@@ -323,13 +323,13 @@ class Tokenizer:
 			elif self._getIsWord( ' ' ):
 				pass
 			elif self._getIsWord( '\t' ):
-				self._fatal( f'Found invalid character at {Loc.create(self, " ")} ( TAB cannot be used )' )
+				raise self._fatal( f'Found invalid character at {Loc.create(self, " ")} ( TAB cannot be used )' )
 			elif self._getIsWord( '\n' ) or self.char == len( self.line ) - 1:
 				if (
 					self.code[ -1 ].typ not in ( TokenType.KEYWORD, TokenType.SYMBOL ) or
 					self.code[ -1 ].value not in ( Symbol.SLASH, Symbol.LBRACK, Symbol.RBRACK, Symbol.LBRACE )
 				) and len( self.line ) != 2:
-					self._fatal(
+					raise self._fatal(
 						f'Missing "/" before newline at line {self.lineN} column {self.char}',
 						self.lineN,
 						self.char
@@ -341,7 +341,7 @@ class Tokenizer:
 					while self._peek( 1 + spaceCount ) == ' ':
 						spaceCount += 1
 					if spaceCount != 0 and spaceCount % 5 != 0:
-						self._fatal( f'Indentation should be a multiple of 5 ( found {spaceCount} spaces )' )
+						raise self._fatal( f'Indentation should be a multiple of 5 ( found {spaceCount} spaces )' )
 					del spaceCount
 			elif self._getIsWord( '\0' ) or ( self.char == len( self.line ) and self.lineN == len( self.lines ) - 1 ):
 				break
@@ -351,7 +351,7 @@ class Tokenizer:
 					if ( numChar := self._getChar() ) != '\0':
 						num += numChar
 					else:
-						self._fatal(
+						raise self._fatal(
 							'Reached end of line without ending /',
 							self.lineN,
 							self.char + len( num )
@@ -365,12 +365,12 @@ class Tokenizer:
 				]
 			else:
 				if self._peek(0) in strmod.punctuation:
-					self._fatal( 'Invalid character in name', None, self.char + 1 )
+					raise self._fatal( 'Invalid character in name', None, self.char + 1 )
 				name: str = ''
 				while self._peek( 0 ) not in ( ' ', '\n', '{', '(', '[', ']', ')', '}', '.', '\0', '/' ):
 					name += self._getChar()
 				if 'e' in name.lower() and ( self.code[ -1 ].typ != TokenType.KEYWORD or self.code[ -1 ].value != Keyword.FROM ):
-					self._fatal(
+					raise self._fatal(
 						'the name at line {line} and column {char} contains "e"',
 						self.lineN,
 						self.char - ( len( name ) - 1 ) + name.lower().index( 'e' )
@@ -462,13 +462,13 @@ class Tokenizer:
 		:raises TokenizerError: When the token is wrong
 		"""
 		if len( self.code ) == 0 or self.code[ -1 + offset ].typ.name != kw.__class__.__name__.upper() or self.code[ -1 + offset ].value != kw:
-			self._fatal(
+			raise self._fatal(
 				f'Missing {kw.name} keyword before {curr.name} keyword at line ' '{line} column {char}',
 				loc[ 1 ],
 				loc[ 2 ]
 			)
 
-	def _fatal( self, message: str, lineNum: int = None, col: int = None ) -> None:
+	def _fatal( self, message: str, lineNum: int = None, col: int = None ) -> TokenizerError:
 		"""
 		Raise an exception with debug information
 		:param message: Message of the exception
@@ -482,7 +482,7 @@ class Tokenizer:
 			err = f'{self._getFile()}:{lineNum + 1}:{col}: {message.format( line=lineNum + 1, char=col )}\n'
 		err += self.lines[ lineNum ].removesuffix('\n') + '\n'
 		err += ( ' ' * ( col - 1 ) ) + '^ here'
-		raise TokenizerError( err )
+		return TokenizerError( err )
 
 
 if __name__ == '__main__':
